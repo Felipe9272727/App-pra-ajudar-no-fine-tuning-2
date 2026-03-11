@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>⚡ QWEN MISSION CTRL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+<style>
+:root{
+  --bg:#00000c;--s1:#03030f;--s2:#06061a;--s3:#0a0a22;--s4:#0f0f2e;
+  --bd:#15153a;--bd2:#1e1e50;--bd3:#2a2a70;
+  --cy:#00f0ff;--cya:rgba(0,240,255,.15);--cyb:rgba(0,240,255,.06);
+  --gn:#00ff88;--gna:rgba(0,255,136,.15);
+  --or:#ff6b35;--ora:rgba(255,107,53,.15);
+  --rd:#ff2d55;--rda:rgba(255,45,85,.15);
+  --yl:#ffd60a;--yla:rgba(255,214,10,.12);
+  --pu:#bf5af2;--pua:rgba(191,90,242,.15);
+  --t:#c8d8ff;--td:#6070a0;--tdd:#2a2a5a;
+  --nav:56px;
+  --navpad:20px;
+  --safebot:env(safe-area-inset-bottom, 20px);
+  --orb:'Orbitron',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --body:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;min-width:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t);font-family:var(--body);font-size:14px}
+
+/* ── COSMIC BG ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(0,240,255,.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(0,255,136,.04) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,240,255,.015) 39px,rgba(0,240,255,.015) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,240,255,.015) 39px,rgba(0,240,255,.015) 40px);
+}
+
+.scr{position:absolute;inset:0 0 0 0;overflow-y:auto;overflow-x:hidden;padding:13px 11px 80px;display:none;-webkit-overflow-scrolling:touch;z-index:1}
+.scr.on{display:block}
+#scr-ai{padding:0}
+#scr-ai.on{display:flex;flex-direction:column}
+
+/* ── NAV ── */
+nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#00000f;
+  border-top:2px solid rgba(0,240,255,.25);
+  display:flex;align-items:flex-start;justify-content:space-around;
+  z-index:9999;
+  padding-top:8px;
+  padding-bottom:max(env(safe-area-inset-bottom, 8px), 8px);
+  box-shadow:0 -4px 20px rgba(0,0,0,.8);
+}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;border:none;background:none;cursor:pointer;transition:all .2s;position:relative;font-family:var(--body);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#404070;min-width:60px;-webkit-tap-highlight-color:rgba(0,240,255,.1)}
+.nb.on{color:var(--cy)}
+.nb svg{width:22px;height:22px;transition:filter .2s;stroke:currentColor}
+.nb.on svg{filter:drop-shadow(0 0 5px var(--cy))}
+.nb-dot{position:absolute;top:2px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--or);box-shadow:0 0 8px var(--or);display:none}
+.nb-dot.on{display:block}
+.nb-lbl{line-height:1}
+
+/* ── GLASS CARD ── */
+.card{background:rgba(6,6,26,.97);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden;max-width:100%}
+.card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(0,240,255,.03) 0%,transparent 60%);pointer-events:none}
+.card-cy{border-color:rgba(0,240,255,.25);box-shadow:0 0 20px rgba(0,240,255,.06),inset 0 1px 0 rgba(0,240,255,.08)}
+.card-gn{border-color:rgba(0,255,136,.25);box-shadow:0 0 20px rgba(0,255,136,.06),inset 0 1px 0 rgba(0,255,136,.08)}
+.card-or{border-color:rgba(255,107,53,.25);box-shadow:0 0 20px rgba(255,107,53,.06)}
+.card-rd{border-color:rgba(255,45,85,.25);box-shadow:0 0 20px rgba(255,45,85,.06)}
+
+/* ── SECTION LABEL ── */
+.slbl{font-family:var(--orb);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cy);opacity:.7;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.slbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,240,255,.3),transparent)}
+
+/* ── ORBITRON TITLE ── */
+.orb-title{font-family:var(--orb);letter-spacing:1px}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;font-family:var(--orb)}
+.b-cy{background:var(--cya);color:var(--cy);border:1px solid rgba(0,240,255,.3)}
+.b-gn{background:var(--gna);color:var(--gn);border:1px solid rgba(0,255,136,.3)}
+.b-or{background:var(--ora);color:var(--or);border:1px solid rgba(255,107,53,.3)}
+.b-rd{background:var(--rda);color:var(--rd);border:1px solid rgba(255,45,85,.3)}
+.b-yl{background:var(--yla);color:var(--yl);border:1px solid rgba(255,214,10,.3)}
+.b-pu{background:var(--pua);color:var(--pu);border:1px solid rgba(191,90,242,.3)}
+.b-dim{background:rgba(255,255,255,.05);color:var(--td);border:1px solid var(--bd2)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border-radius:9px;border:none;font-family:var(--body);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.3px;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.08);opacity:0;transition:opacity .15s}
+.btn:active::after{opacity:1}
+.btn:active{transform:scale(.96)}
+.btn-full{width:100%}
+.btn-cy{background:linear-gradient(135deg,rgba(0,240,255,.2),rgba(0,240,255,.08));color:var(--cy);border:1px solid rgba(0,240,255,.4);box-shadow:0 0 16px rgba(0,240,255,.15)}
+.btn-gn{background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,255,136,.08));color:var(--gn);border:1px solid rgba(0,255,136,.4)}
+.btn-or{background:linear-gradient(135deg,rgba(255,107,53,.2),rgba(255,107,53,.08));color:var(--or);border:1px solid rgba(255,107,53,.4)}
+.btn-rd{background:linear-gradient(135deg,rgba(255,45,85,.2),rgba(255,45,85,.08));color:var(--rd);border:1px solid rgba(255,45,85,.4)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--td);border:1px solid var(--bd2)}
+.btn-sm{padding:7px 13px;font-size:11px;border-radius:7px}
+.btn-xs{padding:5px 9px;font-size:10px;border-radius:6px}
+
+/* ── INPUT ── */
+input,textarea{width:100%;background:rgba(3,3,15,.9);border:1px solid var(--bd2);color:var(--t);border-radius:9px;padding:11px 13px;font-size:13px;outline:none;transition:all .2s;font-family:var(--body)}
+input:focus,textarea:focus{border-color:rgba(0,240,255,.5);box-shadow:0 0 0 3px rgba(0,240,255,.1),0 0 20px rgba(0,240,255,.05)}
+textarea{font-family:var(--mono);font-size:10.5px;line-height:1.7;resize:none}
+
+/* ── STATUS DOT ── */
+.sd{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0}
+.sd-gn{background:var(--gn);box-shadow:0 0 8px var(--gn)}
+.sd-rd{background:var(--rd)}
+.sd-or{background:var(--or);animation:pulse .8s infinite}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px var(--cy)}50%{box-shadow:0 0 24px var(--cy),0 0 48px rgba(0,240,255,.2)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes slideDown{from{transform:none}to{transform:translateY(100%)}}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+@keyframes flash{0%{background:rgba(0,240,255,.2)}100%{background:transparent}}
+@keyframes ripple{0%{transform:scale(0);opacity:.6}100%{transform:scale(3);opacity:0}}
+@keyframes typing{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── CONNECT SCREEN ── */
+.hero{padding:20px 4px 16px;text-align:center}
+.hero-logo{font-family:var(--orb);font-size:11px;letter-spacing:4px;color:var(--cy);opacity:.7;margin-bottom:6px}
+.hero-title{font-family:var(--orb);font-size:clamp(22px,7vw,32px);font-weight:900;letter-spacing:-1px;line-height:1;background:linear-gradient(135deg,#fff 30%,var(--cy));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:11.5px;color:var(--td);margin-top:8px;line-height:1.6}
+.conn-url-row{display:flex;gap:8px;flex-wrap:wrap}
+.conn-url-row input{flex:1;min-width:200px}
+.cf-note{background:linear-gradient(135deg,rgba(0,240,255,.06),transparent);border:1px solid rgba(0,240,255,.18);border-radius:10px;padding:10px 12px;font-size:10.5px;color:var(--cy);line-height:1.7;margin-top:10px}
+.cf-note b{color:var(--t)}
+.conn-info-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--td)}
+
+/* ── SNIPPET ── */
+.snip-box{background:#01010a;border:1px solid var(--bd2);border-radius:10px;overflow:hidden;max-width:100%;width:100%}
+.snip-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--bd);gap:8px}
+.snip-dots{display:flex;gap:5px;flex-shrink:0}
+.snip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.snip-pre{padding:11px 12px;font-family:var(--mono);font-size:9px;line-height:1.75;color:#7090d0;max-height:160px;overflow-x:scroll;overflow-y:auto;white-space:pre;-webkit-overflow-scrolling:touch;display:block;box-sizing:border-box;width:100%}
+
+/* ── RESTART CARD ── */
+.restart-card{background:linear-gradient(135deg,var(--rda),rgba(255,45,85,.05));border:1px solid rgba(255,45,85,.3);border-radius:14px;padding:13px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.restart-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.restart-info{flex:1;min-width:160px}
+.restart-title{font-family:var(--orb);font-size:11px;color:var(--rd);font-weight:700;letter-spacing:.5px}
+.restart-desc{font-size:10px;color:var(--td);margin-top:3px;line-height:1.5}
+
+/* ── CELLS ── */
+.cell{background:rgba(6,6,26,.9);border:1px solid var(--bd);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.cell.running{border-color:rgba(0,240,255,.5);box-shadow:0 0 0 1px rgba(0,240,255,.1),0 8px 30px rgba(0,240,255,.08);animation:cellpulse 2s ease-in-out infinite}
+.cell.done{border-color:rgba(0,255,136,.35);box-shadow:0 0 20px rgba(0,255,136,.06)}
+.cell.error{border-color:rgba(255,45,85,.35)}
+.cell.cancelled{border-color:rgba(255,107,53,.35)}
+@keyframes cellpulse{0%,100%{box-shadow:0 0 0 1px rgba(0,240,255,.1),0 8px 30px rgba(0,240,255,.08)}50%{box-shadow:0 0 0 2px rgba(0,240,255,.2),0 8px 40px rgba(0,240,255,.15)}}
+
+.cell-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(10,10,34,.9);cursor:pointer;user-select:none;min-width:0}
+.cell-idx{font-family:var(--orb);font-size:9px;color:var(--tdd);min-width:18px;flex-shrink:0}
+.cell-ttl{flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cell-st{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+
+.cell-code{width:100%;min-height:80px;padding:10px 12px;font-family:var(--mono);font-size:10.5px;line-height:1.7;background:#01010c;color:#90b0ff;border:none;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);outline:none;tab-size:4;resize:vertical;-webkit-user-select:text;user-select:text}
+.cell-out{padding:10px 12px;font-family:var(--mono);font-size:9.5px;line-height:1.8;color:#6080b0;max-height:220px;overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;word-break:break-all;display:none;background:#010109;border-bottom:1px solid var(--bd);-webkit-overflow-scrolling:touch}
+.cell-out.on{display:block}
+.cell-acts{display:flex;gap:6px;padding:8px 12px;align-items:center;flex-wrap:wrap}
+.acts-r{margin-left:auto;display:flex;gap:5px}
+
+/* ── PIPELINE STAGE CARDS ── */
+.pl-container{display:flex;flex-direction:column;gap:0}
+.pl-stage{position:relative;cursor:pointer}
+.pl-connector{width:2px;height:16px;background:linear-gradient(to bottom,var(--bd2),transparent);margin-left:28px}
+.pl-stage-card{background:rgba(6,6,26,.97);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:10px;transition:all .25s;position:relative;overflow:hidden}
+.pl-stage-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(0,240,255,.02),transparent);pointer-events:none;transition:opacity .3s;opacity:0}
+.pl-stage-card:active{transform:scale(.98)}
+.pl-stage.active .pl-stage-card{border-color:rgba(0,240,255,.45);box-shadow:0 0 0 1px rgba(0,240,255,.1),0 6px 24px rgba(0,240,255,.1);background:rgba(0,240,255,.04)}
+.pl-stage.active .pl-stage-card::before{opacity:1}
+.pl-stage.done .pl-stage-card{border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.03)}
+.pl-stage.skip .pl-stage-card{opacity:.4}
+
+.pl-icon-wrap{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--s3);border:1px solid var(--bd2);position:relative;transition:all .3s}
+.pl-stage.active .pl-icon-wrap{background:rgba(0,240,255,.1);border-color:rgba(0,240,255,.4);animation:glow 2s ease-in-out infinite}
+.pl-stage.done .pl-icon-wrap{background:rgba(0,255,136,.1);border-color:rgba(0,255,136,.4)}
+.pl-spin{position:absolute;inset:-1px;border-radius:13px;border:2px solid transparent;border-top-color:var(--cy);animation:spin .8s linear infinite;display:none}
+.pl-stage.active .pl-spin{display:block}
+
+.pl-body{flex:1;min-width:0}
+.pl-name{font-family:var(--orb);font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-desc{font-size:10px;color:var(--td);margin-top:3px;line-height:1.4}
+.pl-meta{display:flex;align-items:center;gap:6px;margin-top:5px}
+
+.pl-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.pl-chevron{font-size:12px;color:var(--tdd);transition:transform .2s}
+.pl-stage.active .pl-chevron{color:var(--cy);transform:rotate(90deg)}
+
+/* ── METRICS ── */
+.met-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.met{background:rgba(6,6,26,.9);border-radius:10px;padding:12px;border:1px solid var(--bd);position:relative;overflow:hidden;transition:border-color .3s}
+.met::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:inherit;opacity:.3}
+.met-v{font-family:var(--orb);font-size:18px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.met-l{font-family:var(--orb);font-size:7px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tdd)}
+.met-bar{height:2px;border-radius:1px;margin-top:6px;background:var(--bd)}
+.met-bar-fill{height:100%;border-radius:1px;transition:width .6s}
+.met.cy{border-color:rgba(0,240,255,.25)}.met.cy .met-v{color:var(--cy)}.met.cy .met-bar-fill{background:var(--cy)}
+.met.gn{border-color:rgba(0,255,136,.25)}.met.gn .met-v{color:var(--gn)}.met.gn .met-bar-fill{background:var(--gn)}
+.met.or{border-color:rgba(255,107,53,.25)}.met.or .met-v{color:var(--or)}.met.or .met-bar-fill{background:var(--or)}
+.met.yl{border-color:rgba(255,214,10,.25)}.met.yl .met-v{color:var(--yl)}.met.yl .met-bar-fill{background:var(--yl)}
+
+/* ── PROGRESS BAR ── */
+.prog-track{background:rgba(255,255,255,.05);border-radius:6px;height:10px;overflow:hidden;position:relative}
+.prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cy),rgba(0,255,136,.8));transition:width .5s cubic-bezier(.4,0,.2,1);position:relative}
+.prog-fill::after{content:'';position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:scan 1.5s linear infinite}
+@keyframes scan{0%{right:100%}100%{right:-30px}}
+.prog-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--tdd);margin-top:4px}
+
+/* ── VRAM METER ── */
+.vram-visual{display:flex;gap:6px;margin-bottom:8px}
+.vram-chip{flex:1;background:var(--s2);border-radius:8px;padding:8px 10px;text-align:center;border:1px solid var(--bd);transition:border-color .3s}
+.vc-a{border-color:rgba(0,240,255,.2)}.vc-a .vram-v{color:var(--cy)}
+.vc-f{border-color:rgba(0,255,136,.2)}.vc-f .vram-v{color:var(--gn)}
+.vc-t .vram-v{color:var(--td)}
+.vram-v{font-family:var(--orb);font-size:13px;font-weight:700;line-height:1;white-space:nowrap}
+.vram-l{font-family:var(--orb);font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--tdd);margin-top:2px}
+.vbar-track{height:8px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden}
+.vbar-fill{height:100%;border-radius:4px;transition:width .6s,background .3s}
+
+/* ── REWARD BREAKDOWN ── */
+.rw{display:flex;align-items:center;gap:8px;margin:5px 0}
+.rw-n{font-family:var(--mono);font-size:9px;color:var(--td);width:90px;flex-shrink:0}
+.rw-track{flex:1;background:rgba(255,255,255,.04);border-radius:3px;height:6px;overflow:hidden}
+.rw-fill{height:100%;border-radius:3px;transition:width .4s}
+.rw-v{font-family:var(--mono);font-size:9px;font-weight:600;width:42px;text-align:right;flex-shrink:0}
+
+/* ── CHART ── */
+.chart-wrap{height:160px;position:relative;margin-top:8px}
+
+/* ── LIVE OUTPUT DRAWER ── */
+#live-drawer{
+  position:fixed;left:0;right:0;bottom:0;z-index:150;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.9,.3,1);
+  height:55vh;max-height:55vh;display:flex;flex-direction:column;
+  background:rgba(0,0,14,.99);border-top:1px solid rgba(0,240,255,.3);
+  border-radius:18px 18px 0 0;
+  box-shadow:0 -8px 40px rgba(0,240,255,.1);
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+}
+#live-drawer.open{transform:translateY(0)}
+.drawer-handle-bar{width:36px;height:3px;background:var(--bd2);border-radius:2px;margin:10px auto 0}
+.drawer-header{display:flex;align-items:center;gap:10px;padding:10px 14px 8px;border-bottom:1px solid var(--bd)}
+.drawer-title{font-family:var(--orb);font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--cy);flex:1}
+.drawer-pulse{width:7px;height:7px;border-radius:50%;background:var(--cy);animation:pulse .6s infinite;flex-shrink:0;box-shadow:0 0 8px var(--cy)}
+.drawer-out{flex:1;overflow-y:auto;padding:10px 14px;font-family:var(--mono);font-size:10px;line-height:1.8;color:#7090b0;-webkit-overflow-scrolling:touch;white-space:pre-wrap;word-break:break-all}
+.drawer-acts{display:flex;gap:8px;padding:8px 14px calc(8px + env(safe-area-inset-bottom,8px));border-top:1px solid var(--bd);flex-wrap:wrap;flex-shrink:0}
+
+/* ── STAGE DETAIL DRAWER ── */
+#stage-drawer{
+  position:fixed;left:0;right:0;bottom:0;z-index:150;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.9,.3,1);
+  height:68vh;max-height:68vh;display:flex;flex-direction:column;
+  background:rgba(0,0,14,.99);border-top:1px solid var(--bd2);
+  border-radius:18px 18px 0 0;
+  box-shadow:0 -4px 30px rgba(0,0,0,.5);
+}
+#stage-drawer.open{transform:translateY(0)}
+.sdrawer-head{padding:10px 14px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sdrawer-icon-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.sdrawer-icon{font-size:32px;flex-shrink:0}
+.sdrawer-meta{flex:1;min-width:0}
+.sdrawer-title{font-family:var(--orb);font-size:13px;font-weight:700;letter-spacing:.3px;word-break:break-word}
+.sdrawer-sub{font-size:10.5px;color:var(--td);margin-top:3px}
+.sdrawer-log{flex:1;overflow-y:auto;padding:10px 14px;font-family:var(--mono);font-size:10px;line-height:1.8;color:#6080a0;-webkit-overflow-scrolling:touch;white-space:pre-wrap;word-break:break-all;background:#010109}
+.sdrawer-acts{padding:8px 14px calc(8px + env(safe-area-inset-bottom,8px));border-top:1px solid var(--bd);flex-shrink:0;display:flex;gap:8px}
+
+/* ── OUTPUT FLASH NOTIFICATION ── */
+#output-flash{
+  position:fixed;left:12px;right:12px;z-index:200;
+  top:52px;
+  background:rgba(0,10,30,.97);border:1px solid rgba(0,240,255,.5);
+  border-radius:12px;padding:12px 14px;
+  transform:translateY(-20px);opacity:0;
+  transition:all .3s cubic-bezier(.2,.9,.3,1);
+  pointer-events:none;
+  box-shadow:0 0 30px rgba(0,240,255,.15);
+}
+#output-flash.show{transform:translateY(0);opacity:1}
+.flash-label{font-family:var(--orb);font-size:9px;color:var(--cy);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.flash-text{font-family:var(--mono);font-size:11px;color:var(--t);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* ── LOG SCREEN ── */
+.log-wrap{background:#01010c;border:1px solid var(--bd);border-radius:14px;padding:10px 12px;height:calc(100vh - 150px);overflow-y:auto;overflow-x:hidden;font-family:var(--mono);font-size:10px;line-height:1.8;color:#5070a0;-webkit-overflow-scrolling:touch;word-break:break-all}
+.log-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--tdd);font-size:12px;font-family:var(--body)}
+
+/* ── OVERLAY BACKDROP ── */
+.drawer-backdrop{position:fixed;top:0;left:0;right:0;bottom:calc(var(--nav) + var(--navpad));background:rgba(0,0,0,.7);z-index:140;display:none}
+.drawer-backdrop.on{display:block}
+
+/* ── OUTPUT COLORS ── */
+.o-hdr{color:#4060c0;font-weight:700}
+.o-sec{color:var(--cy);font-weight:700}
+.o-ok{color:var(--gn)}
+.o-err{color:var(--rd)}
+.o-warn{color:var(--or)}
+.o-vram{color:#30d090}
+.o-step{color:var(--pu);font-weight:600}
+.o-ts{color:var(--tdd)}
+.o-info{color:var(--cy)}
+.o-drive{color:var(--yl)}
+
+/* ── RUNNING INDICATOR ── */
+.rund{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--cy);animation:pulse .6s infinite;margin-right:4px;box-shadow:0 0 5px var(--cy)}
+
+/* ── AI CHAT BUBBLES ── */
+.ai-msg{display:flex;gap:8px;animation:fadeUp .2s ease}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-bubble{max-width:82%;padding:10px 13px;border-radius:14px;font-size:12px;line-height:1.65;word-break:break-word}
+.ai-msg.user .ai-bubble{background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.25);color:var(--t);border-bottom-right-radius:4px}
+.ai-msg.ai .ai-bubble{background:rgba(15,15,46,.9);border:1px solid var(--bd2);color:var(--t);border-bottom-left-radius:4px}
+.ai-msg.system .ai-bubble{background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);color:var(--or);font-size:11px;max-width:100%;border-radius:10px}
+.ai-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.ai-avatar.ai-av{background:rgba(0,240,255,.1);border:1px solid rgba(0,240,255,.3)}
+.ai-avatar.user-av{background:rgba(191,90,242,.1);border:1px solid rgba(191,90,242,.3)}
+.ai-typing{display:flex;gap:4px;padding:12px 14px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--cy);animation:aitype .8s infinite}
+.ai-dot:nth-child(2){animation-delay:.15s}
+.ai-dot:nth-child(3){animation-delay:.3s}
+@keyframes aitype{0%,80%,100%{transform:scale(.8);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* ── AI ALERT (error/autocancel popup) ── */
+#ai-alert{position:fixed;left:12px;right:12px;top:16px;z-index:220;background:rgba(0,5,20,.98);border:1px solid rgba(0,240,255,.4);border-radius:14px;padding:14px;transform:translateY(-8px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 0 30px rgba(0,240,255,.15)}
+#ai-alert.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.ai-alert-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-alert-icon{font-size:20px;flex-shrink:0}
+.ai-alert-title{font-family:var(--orb);font-size:11px;font-weight:700;color:var(--cy);flex:1}
+.ai-alert-body{font-size:11px;color:var(--t);line-height:1.7;max-height:180px;overflow-y:auto}
+.ai-alert-acts{display:flex;gap:8px;margin-top:10px}
+
+#toast{position:fixed;bottom:calc(var(--nav) + env(safe-area-inset-bottom,0px) + 10px);left:50%;transform:translateX(-50%) translateY(4px);background:rgba(10,10,30,.97);border:1px solid var(--bd2);color:var(--t);padding:9px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:300;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;font-family:var(--body)}
+#toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ── SROW ── */
+.srow{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.stitle{font-family:var(--orb);font-size:13px;font-weight:700;letter-spacing:.5px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ CONNECT ═══════════════ -->
+<div id="scr-connect" class="scr on">
+  <div class="hero">
+    <div class="hero-logo">MISSION CONTROL</div>
+    <div class="hero-title">QWEN TRAINER</div>
+    <div class="hero-sub">Qwen2.5-Coder-7B · A100 80GB · SFT + MO-GRPO v3</div>
+  </div>
+
+  <!-- restart -->
+  <div class="restart-card" id="restart-zone" style="display:none">
+    <div class="restart-icon">🔄</div>
+    <div class="restart-info">
+      <div class="restart-title">REINICIAR RUNTIME</div>
+      <div class="restart-desc">Finaliza kernel Colab e limpa memória GPU. Bridge precisa ser re-executada após reinício.</div>
+    </div>
+    <button class="btn btn-rd btn-sm" onclick="doRestart()">Reset</button>
+  </div>
+
+  <!-- step 1 -->
+  <div class="card">
+    <div class="slbl">① Bridge — rode no Colab</div>
+    <p style="font-size:11px;color:var(--td);margin-bottom:10px;line-height:1.6">Sem token, sem conta. <b style="color:var(--cy)">Cloudflare Tunnel</b> + suporte a cancel de célula:</p>
+    <div class="snip-box">
+      <div class="snip-toolbar">
+        <div class="snip-dots">
+          <div class="snip-dot" style="background:#ff5f57"></div>
+          <div class="snip-dot" style="background:#febc2e"></div>
+          <div class="snip-dot" style="background:#28c840"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--tdd)">colab_bridge.py</span>
+        <button class="btn btn-ghost btn-xs" onclick="copySnippet()">⎘ Copiar</button>
+      </div>
+      <pre id="snippet-el" class="snip-pre"></pre>
+    </div>
+    <div class="cf-note">☁️ <b>Cloudflare Tunnel</b> — URL: <b>https://xxxx.trycloudflare.com</b><br>Streaming via fetch ReadableStream · Cancel via PyThreadState_SetAsyncExc</div>
+  </div>
+
+  <!-- step 2 -->
+  <div class="card">
+    <div class="slbl">② Cole a URL gerada</div>
+    <div class="conn-url-row">
+      <input type="url" id="url-input" placeholder="https://xxxx.trycloudflare.com" autocomplete="off">
+      <button class="btn btn-cy btn-sm" id="btn-conn" onclick="doConnect()">Conectar</button>
+    </div>
+    <div id="conn-status" class="conn-info-row" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ CELLS ═══════════════ -->
+<div id="scr-cells" class="scr">
+  <div class="srow">
+    <span class="stitle">CÉLULAS</span>
+    <div style="display:flex;gap:7px">
+      <button class="btn btn-ghost btn-sm" onclick="addCell()">+ Nova</button>
+      <button class="btn btn-cy btn-sm" onclick="runAll()">▶ Todas</button>
+    </div>
+  </div>
+  <div id="cells-list"></div>
+  <div class="card" style="border-style:dashed;border-color:var(--bd2);text-align:center;padding:18px;cursor:pointer" onclick="showPresets()">
+    <div style="font-size:22px;margin-bottom:5px">📋</div>
+    <div style="font-family:var(--orb);font-size:10px;letter-spacing:.5px;color:var(--tdd)">INSERIR PRESET — PIPELINE V3</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PIPELINE ═══════════════ -->
+<div id="scr-train" class="scr">
+
+  <!-- phase hero -->
+  <div class="card card-cy" id="phase-hero" style="padding:14px 13px">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div id="ph-icon" style="font-size:32px;line-height:1;flex-shrink:0;margin-top:2px">⏸️</div>
+      <div style="flex:1;min-width:0">
+        <div class="badge b-dim" id="ph-badge" style="margin-bottom:6px">IDLE</div>
+        <div id="ph-title" style="font-family:var(--orb);font-size:14px;font-weight:700;letter-spacing:.3px;line-height:1.25;word-break:break-word">Aguardando início</div>
+        <div id="ph-sub" style="font-size:10px;color:var(--td);margin-top:4px;line-height:1.5">Conecte o Colab e execute o pipeline</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- metrics -->
+  <div class="slbl" style="margin-top:4px">Métricas em tempo real</div>
+  <div class="met-grid">
+    <div class="met cy">
+      <div class="met-v" id="m-step">—</div>
+      <div class="met-l">Step atual</div>
+      <div class="met-bar"><div class="met-bar-fill" id="mb-step" style="width:0%"></div></div>
+    </div>
+    <div class="met gn">
+      <div class="met-v" id="m-rw">—</div>
+      <div class="met-l">Combined Reward</div>
+      <div class="met-bar"><div class="met-bar-fill" id="mb-rw" style="width:50%"></div></div>
+    </div>
+    <div class="met or">
+      <div class="met-v" id="m-loss">—</div>
+      <div class="met-l">Loss</div>
+      <div class="met-bar"><div class="met-bar-fill" id="mb-loss" style="width:0%"></div></div>
+    </div>
+    <div class="met yl">
+      <div class="met-v" id="m-vfree">—</div>
+      <div class="met-l">VRAM livre</div>
+      <div class="met-bar"><div class="met-bar-fill" id="mb-vfree" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- progress -->
+  <div id="prog-card" class="card" style="display:none;margin-top:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <div class="slbl" style="margin-bottom:0">Progresso</div>
+      <span id="prog-badge" class="badge b-cy">—</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-labels"><span id="prog-cur">0</span><span id="prog-pct" style="color:var(--cy)">0%</span><span id="prog-max">—</span></div>
+  </div>
+
+  <!-- pipeline stages -->
+  <div class="slbl" style="margin-top:4px">Pipeline v3 — toque para detalhes</div>
+  <div class="pl-container" id="pl-container"></div>
+
+  <!-- vram -->
+  <div class="slbl" style="margin-top:10px">VRAM — A100 80GB</div>
+  <div class="card" style="padding:12px">
+    <div class="vram-visual">
+      <div class="vram-chip vc-a"><div class="vram-v" id="vc-a">—</div><div class="vram-l">Alocado</div></div>
+      <div class="vram-chip vc-f"><div class="vram-v" id="vc-f">—</div><div class="vram-l">Livre</div></div>
+      <div class="vram-chip vc-t"><div class="vram-v" id="vc-t">—</div><div class="vram-l">Total</div></div>
+    </div>
+    <div class="vbar-track"><div class="vbar-fill" id="vbar" style="width:0%;background:var(--gn)"></div></div>
+  </div>
+
+  <!-- reward chart -->
+  <div id="chart-card" class="card" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="slbl" style="margin-bottom:0">Reward / Step</div>
+      <span id="chart-badge" class="badge b-cy">0 pts</span>
+    </div>
+    <div class="chart-wrap"><canvas id="rwchart"></canvas></div>
+  </div>
+
+  <!-- reward breakdown -->
+  <div id="rw-card" class="card" style="display:none">
+    <div class="slbl">Breakdown — últimas rewards</div>
+    <div id="rw-rows"></div>
+  </div>
+  <div style="height:10px"></div>
+</div>
+
+<!-- ═══════════════ AI ═══════════════ -->
+<div id="scr-ai" class="scr">
+  <!-- API key setup (shown when no key) -->
+  <div id="ai-setup" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:13px 11px 80px">
+    <div class="hero" style="padding:16px 4px 10px">
+      <div class="hero-logo">ASSISTENTE IA</div>
+      <div class="hero-title" style="font-size:clamp(18px,6vw,26px)">AI ASSISTANT</div>
+      <div class="hero-sub">Analisa erros · Auto-cancel reward · Chat</div>
+    </div>
+    <div class="card card-cy">
+      <div class="slbl">OpenRouter API Key</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="password" id="ai-key-input" placeholder="sk-or-v1-…" autocomplete="off" style="font-family:var(--mono);font-size:11px;letter-spacing:.5px">
+        <button class="btn btn-cy btn-sm" onclick="validateApiKey()" id="ai-validate-btn">Validar</button>
+      </div>
+      <div id="ai-key-status" style="font-size:11px;color:var(--td);margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:10px;color:var(--tdd)">Modelo:</label>
+        <select id="ai-model-sel" style="flex:1;background:rgba(3,3,15,.9);border:1px solid var(--bd2);color:var(--t);border-radius:7px;padding:6px 10px;font-size:11px;font-family:var(--mono);outline:none">
+          <option value="anthropic/claude-sonnet-4-5">claude-sonnet-4-5 ⭐</option>
+          <option value="anthropic/claude-haiku-4-5">claude-haiku-4-5 ⚡</option>
+          <option value="anthropic/claude-opus-4-5">claude-opus-4-5 🧠</option>
+          <option value="openai/gpt-4o-mini">gpt-4o-mini 💰</option>
+          <option value="openai/gpt-4o">gpt-4o</option>
+          <option value="google/gemini-flash-1.5">gemini-flash-1.5</option>
+          <option value="meta-llama/llama-3.3-70b-instruct">llama-3.3-70b</option>
+          <option value="deepseek/deepseek-r1">deepseek-r1 🔥</option>
+        </select>
+      </div>
+      <div id="ai-detected-badge" style="margin-top:8px;display:none"></div>
+    </div>
+    <div class="card" style="border-color:rgba(0,240,255,.15)">
+      <div class="slbl">Como obter a chave</div>
+      <div style="font-size:11px;color:var(--t);line-height:1.8">
+        1. Acesse <b style="color:var(--cy)">openrouter.ai</b><br>
+        2. Crie conta → vá em <b>Keys</b><br>
+        3. Clique em <b>Create Key</b><br>
+        4. Copie <b style="color:var(--cy)">sk-or-v1-…</b> e cole aqui ↑
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--bd2)">
+      <div class="slbl">Funcionalidades</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:flex-start;gap:10px"><span style="font-size:16px">🔍</span><div><div style="font-size:12px;font-weight:600">Análise de erros</div><div style="font-size:10px;color:var(--td);margin-top:2px">Quando uma célula falha, a IA explica e sugere correções</div></div></div>
+        <div style="display:flex;align-items:flex-start;gap:10px"><span style="font-size:16px">⚡</span><div><div style="font-size:12px;font-weight:600">Auto-cancel reward baixo</div><div style="font-size:10px;color:var(--td);margin-top:2px">Se reward &lt; 0.50 por 3 steps seguidos, cancela e analisa</div></div></div>
+        <div style="display:flex;align-items:flex-start;gap:10px"><span style="font-size:16px">💬</span><div><div style="font-size:12px;font-weight:600">Chat direto</div><div style="font-size:10px;color:var(--td);margin-top:2px">Tire dúvidas do pipeline, peça análises</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat UI (shown when key is valid) -->
+  <div id="ai-chat" style="display:none;flex-direction:column;flex:1;min-height:0;padding:13px 11px 0">
+    <!-- header -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--orb);font-size:11px;font-weight:700;color:var(--cy);letter-spacing:.5px">AI ASSISTANT</div>
+        <div id="ai-model-label" style="font-family:var(--mono);font-size:9px;color:var(--tdd);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <button class="btn btn-ghost btn-xs" onclick="clearChat()">Limpar</button>
+      <button class="btn btn-rd btn-xs" onclick="disconnectAI()">Trocar</button>
+    </div>
+
+    <!-- auto-cancel status -->
+    <div id="ai-autocancel-bar" style="display:none;background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.3);border-radius:10px;padding:8px 12px;margin-bottom:8px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:14px">⚡</span>
+        <div style="flex:1;font-size:10.5px;color:var(--or)">Auto-cancel · reward &lt; 0.50 por <span id="ai-low-count">0</span>/3 steps</div>
+        <button class="btn btn-ghost btn-xs" id="autocancel-toggle-btn" onclick="toggleAutoCancel()">ON</button>
+      </div>
+    </div>
+
+    <!-- messages -->
+    <div id="ai-messages" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px;padding-bottom:8px;min-height:0"></div>
+
+    <!-- input -->
+    <div class="ai-input-row" style="display:flex;gap:8px;padding:8px 0 12px;border-top:1px solid var(--bd);flex-shrink:0;margin-top:4px">
+      <textarea id="ai-msg-input" placeholder="Mensagem…" rows="2"
+        style="flex:1;resize:none;font-size:16px;padding:9px 12px;-webkit-user-select:text;user-select:text;touch-action:auto"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMsg();}"></textarea>
+      <button class="btn btn-cy" id="ai-send-btn" onclick="sendAIMsg()" style="align-self:flex-end;padding:11px 15px;font-size:16px;flex-shrink:0">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ LOGS ═══════════════ -->
+<div id="scr-logs" class="scr">
+  <div class="srow">
+    <span class="stitle">OUTPUT COMPLETO</span>
+    <div style="display:flex;gap:7px">
+      <button class="btn btn-ghost btn-sm" onclick="clearLogs()">Limpar</button>
+      <button class="btn btn-cy btn-sm" onclick="scrollBot()">↓ Fim</button>
+    </div>
+  </div>
+  <div class="log-wrap" id="log-wrap"><div class="log-empty">Sem output — execute uma célula</div></div>
+</div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <button class="nb on" id="nav-connect" onclick="goto('connect')">
+    <div class="nb-dot" id="nd-conn"></div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    Conectar
+  </button>
+  <button class="nb" id="nav-cells" onclick="goto('cells')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+    Células
+  </button>
+  <button class="nb" id="nav-train" onclick="goto('train')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Pipeline
+  </button>
+  <button class="nb" id="nav-ai" onclick="goto('ai')">
+    <div class="nb-dot" id="nd-ai"></div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    IA
+  </button>
+  <button class="nb" id="nav-logs" onclick="goto('logs')">
+    <div class="nb-dot" id="nd-logs"></div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    Logs
+  </button>
+</nav>
+
+<!-- ═══════════════ LIVE OUTPUT DRAWER ═══════════════ -->
+<!-- ═══════════════ LIVE OUTPUT DRAWER ═══════════════ -->
+<div class="drawer-backdrop" id="live-bg" onclick="closeDrawer()"></div>
+<div id="live-drawer">
+  <div class="drawer-handle-bar" onclick="closeDrawer()" style="cursor:pointer;padding:6px 0 2px"></div>
+  <div class="drawer-header">
+    <div class="drawer-pulse" id="drawer-pulse"></div>
+    <div class="drawer-title" id="drawer-title">EXECUTANDO…</div>
+    <span id="drawer-cell-badge" class="badge b-dim"></span>
+    <button onclick="closeDrawer()" style="background:none;border:none;color:var(--td);font-size:20px;line-height:1;padding:0 0 0 8px;cursor:pointer;flex-shrink:0">×</button>
+  </div>
+  <div class="drawer-out" id="drawer-out"></div>
+  <div class="drawer-acts">
+    <button class="btn btn-or btn-sm" id="drawer-cancel-btn" onclick="cancelCurrentCell()">⊘ Cancelar</button>
+    <button class="btn btn-cy btn-sm" style="margin-left:auto" onclick="goto('logs');closeDrawer()">Ver tudo →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ STAGE DETAIL DRAWER ═══════════════ -->
+<div class="drawer-backdrop" id="sdrawer-bg" onclick="closeStageDrawer()"></div>
+<div id="stage-drawer">
+  <div class="sdrawer-head">
+    <div class="sdrawer-icon-row">
+      <div class="sdrawer-icon" id="sd-icon">🔍</div>
+      <div class="sdrawer-meta">
+        <div class="sdrawer-title" id="sd-title">Stage</div>
+        <div class="sdrawer-sub" id="sd-sub">Descrição</div>
+      </div>
+      <span id="sd-badge" class="badge b-dim">—</span>
+    </div>
+    <div id="sd-extra" style="font-size:10.5px;color:var(--td);line-height:1.7"></div>
+  </div>
+  <div class="sdrawer-log" id="sd-log"><span style="color:var(--tdd)">Sem output para esta seção ainda…</span></div>
+  <div class="sdrawer-acts">
+    <button class="btn btn-ghost btn-sm btn-full" onclick="closeStageDrawer()">Fechar</button>
+  </div>
+</div>
+
+<!-- ═══════════════ OUTPUT FLASH ═══════════════ -->
+<div id="output-flash">
+  <div class="flash-label">▶ OUTPUT AO VIVO</div>
+  <div class="flash-text" id="flash-text"></div>
+</div>
+
+<!-- ═══════════════ PRESETS MODAL ═══════════════ -->
+<div class="drawer-backdrop" id="modal-bg" onclick="closeModal()"></div>
+<div id="modal" style="position:fixed;left:0;right:0;bottom:calc(var(--nav) + var(--navpad));z-index:160;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.9,.3,1);height:68vh;max-height:68vh;display:flex;flex-direction:column;background:#000814;border-top:1px solid var(--bd2);border-radius:18px 18px 0 0">
+  <div style="padding:16px 14px 10px;border-bottom:1px solid var(--bd);flex-shrink:0">
+    <div style="font-family:var(--orb);font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--cy)">PRESETS — PIPELINE V3</div>
+  </div>
+  <div id="presets-list" style="flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch"></div>
+  <div style="padding:10px 14px 16px;border-top:1px solid var(--bd);flex-shrink:0">
+    <button class="btn btn-ghost btn-full" onclick="closeModal()">Fechar</button>
+  </div>
+</div>
+
+<!-- AI ALERT -->
+<div id="ai-alert">
+  <div class="ai-alert-head">
+    <div class="ai-alert-icon" id="ai-alert-icon">🤖</div>
+    <div class="ai-alert-title" id="ai-alert-title">CLAUDE AI</div>
+    <button onclick="closeAIAlert()" style="background:none;border:none;color:var(--td);font-size:20px;cursor:pointer;padding:0">×</button>
+  </div>
+  <div class="ai-alert-body" id="ai-alert-body"></div>
+  <div class="ai-alert-acts" id="ai-alert-acts"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════
+// BOOTSTRAP SNIPPET
+// ══════════════════════════════════════════════════
+const BOOTSTRAP = `# ════════════════════════════════════════════
+# 🌉 COLAB BRIDGE v3.1 · URL fix · Cancel · Restart
+# ════════════════════════════════════════════
+!pip install flask flask-cors -q
+!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared
+!chmod +x /usr/local/bin/cloudflared
+
+import os,sys,json,queue,threading,traceback,subprocess,re,time,ctypes,signal
+from flask import Flask,request,jsonify,Response
+from flask_cors import CORS
+from datetime import datetime
+
+app=Flask(__name__)
+CORS(app,resources={r"/*":{"origins":"*"}})
+_cells={}; _threads={}; _running={}; _globals={}
+
+class Cap:
+    def __init__(self,q): self._q=q; self._o=sys.__stdout__
+    def write(self,t):
+        if t:
+            try: self._q.put_nowait({"t":"o","v":t})
+            except: pass
+            try: self._o.write(t)
+            except: pass
+    def flush(self):
+        try: self._o.flush()
+        except: pass
+
+@app.route('/ping')
+def ping():
+    r={"ok":True,"ts":datetime.now().isoformat()}
+    try:
+        import torch
+        if torch.cuda.is_available():
+            f,tot=torch.cuda.mem_get_info()
+            a=torch.cuda.memory_allocated()
+            r["vram"]={"free":round(f/1e9,1),"total":round(tot/1e9,1),"alloc":round(a/1e9,1)}
+            r["gpu"]=torch.cuda.get_device_name(0)
+    except: pass
+    return jsonify(r)
+
+@app.route('/run',methods=['POST'])
+def run_cell():
+    d=request.json or {}
+    cid=d.get('id','c0'); code=d.get('code','')
+    _cells[cid]=queue.Queue(); _running[cid]=True
+    def _exec():
+        _threads[cid]=threading.current_thread().ident
+        cap=Cap(_cells[cid]); sys.stdout=cap; sys.stderr=cap
+        try:
+            exec(compile(code,'<cell>','exec'),_globals)
+            _cells[cid].put({"t":"done","s":"ok"})
+        except SystemExit: _cells[cid].put({"t":"done","s":"exit"})
+        except KeyboardInterrupt:
+            _cells[cid].put({"t":"o","v":"\\n⚠️ Cancelado\\n"})
+            _cells[cid].put({"t":"done","s":"cancelled"})
+        except Exception:
+            _cells[cid].put({"t":"o","v":traceback.format_exc()})
+            _cells[cid].put({"t":"done","s":"err"})
+        finally:
+            sys.stdout=sys.__stdout__; sys.stderr=sys.__stderr__
+            _running[cid]=False
+    threading.Thread(target=_exec,daemon=True).start()
+    return jsonify({"ok":True,"id":cid})
+
+@app.route('/cancel/<cid>',methods=['POST'])
+def cancel_cell(cid):
+    tid=_threads.get(cid)
+    if tid:
+        try: ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(tid),ctypes.py_object(KeyboardInterrupt))
+        except: pass
+    if cid in _cells: _cells[cid].put({"t":"done","s":"cancelled"})
+    _running[cid]=False
+    return jsonify({"ok":True})
+
+@app.route('/stream/<cid>')
+def stream(cid):
+    def gen():
+        if cid not in _cells:
+            yield f"data:{json.dumps({'t':'done','s':'err'})}\\n\\n"; return
+        while True:
+            try:
+                msg=_cells[cid].get(timeout=45)
+                yield f"data:{json.dumps(msg)}\\n\\n"
+                if msg.get('t')=='done': break
+            except: yield 'data:{"t":"hb"}\\n\\n'
+    return Response(gen(),mimetype='text/event-stream',
+        headers={'Cache-Control':'no-cache','X-Accel-Buffering':'no',
+                 'Access-Control-Allow-Origin':'*','Connection':'keep-alive'})
+
+@app.route('/restart',methods=['POST'])
+def restart_runtime():
+    def _do():
+        time.sleep(.5)
+        try:
+            from google.colab import runtime
+            runtime.restart()
+        except:
+            os.kill(os.getpid(),signal.SIGTERM)
+    threading.Thread(target=_do,daemon=True).start()
+    return jsonify({"ok":True,"msg":"Reiniciando…"})
+
+@app.route('/vars')
+def get_vars():
+    safe={}
+    for k,v in _globals.items():
+        if not k.startswith('_'):
+            try: safe[k]=str(v)[:120]
+            except: pass
+    return jsonify(safe)
+
+# ── Flask em background ──
+threading.Thread(target=lambda:app.run(port=5000,use_reloader=False,threaded=True),daemon=True).start()
+time.sleep(2)
+
+# ── Cloudflare Tunnel ──
+# Usa stdbuf para forçar flush linha a linha (resolve bufferização no Colab)
+_url = None
+print("⏳ Iniciando tunnel…", flush=True)
+try:
+    _p = subprocess.Popen(
+        'stdbuf -oL -eL cloudflared tunnel --url http://localhost:5000 2>&1',
+        shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
+    _PAT = re.compile(r'https://[a-zA-Z0-9-]+\\.trycloudflare\\.com', re.I)
+    for _raw in _p.stdout:
+        _line = _raw.decode('utf-8', errors='ignore').strip()
+        if _line: print(_line, flush=True)
+        _m = _PAT.search(_line)
+        if _m: _url = _m.group(); break
+except Exception as _e:
+    print(f"Erro: {_e}", flush=True)
+
+print(f"""
+{'='*54}
+  ⚡  BRIDGE v3.2 ATIVA
+  📱  URL: {_url or '(não detectada — veja log acima)'}
+  Cole no app Qwen Trainer → Conectar
+{'='*54}
+""", flush=True)`;
+
+document.getElementById('snippet-el').textContent = BOOTSTRAP;
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+const S = {
+  url: localStorage.getItem('colab_url') || '',
+  connected: false,
+  cells: JSON.parse(localStorage.getItem('cells') || '[]'),
+  stage: 'idle',
+  step: 0, sftStep: 0, sftMax: 1000, grpoStep: 0, grpoMax: 3000,
+  reward: {}, combinedReward: null, loss: null, vram: null,
+  rewardHistory: [], chart: null,
+  readers: {},       // cid -> reader
+  currentCid: null,  // currently running cell id
+  stageLogs: {},     // stageId -> accumulated text
+  activeStage: null, // stage currently shown in drawer
+};
+
+// ══════════════════════════════════════════════════
+// PIPELINE DEFINITION
+// ══════════════════════════════════════════════════
+const PL = [
+  { id:'s1',  sec:'SECAO 1',  icon:'🔍', name:'VRAM Check',    badge:'b-cy',
+    desc:'Verifica memória livre na A100 80GB',
+    detail:'Checa se há pelo menos 60GB livres. Se não houver, lança SystemExit pedindo para reiniciar o runtime e deletar o ambiente.' },
+  { id:'s2',  sec:'SECAO 2',  icon:'📦', name:'Instalação',    badge:'b-cy',
+    desc:'unsloth · vllm · glslang-tools',
+    detail:'Instala pip: unsloth, vllm. apt-get: glslang-tools (compilador GLSL). Verifica se glslangValidator e Node.js estão disponíveis.' },
+  { id:'s3',  sec:'SECAO 3',  icon:'💾', name:'Google Drive',  badge:'b-yl',
+    desc:'Monta drive e cria estrutura de pastas',
+    detail:'Monta /content/drive e cria: dataset/, sft/, grpo/, output/merged-16bit, output/lora-only, output/gguf, logs/, reward-logs/' },
+  { id:'s4',  sec:'SECAO 4',  icon:'🗃️', name:'Dataset',       badge:'b-cy',
+    desc:'5 datasets em paralelo com curriculum',
+    detail:'Carrega em paralelo (ThreadPoolExecutor): HyperThink (80k), VisCode (60k), CodeFeedback (20k), CoderForge (40k), Opus. Ordena por dificuldade crescente (curriculum learning).' },
+  { id:'s5',  sec:'SECAO 5',  icon:'🤖', name:'Modelo + LoRA', badge:'b-cy',
+    desc:'Qwen2.5-Coder-7B-bnb-4bit · rank=64',
+    detail:'Carrega modelo em 4-bit via unsloth. Aplica LoRA rank=64 alpha=64 nos módulos q/k/v/o/gate/up/down_proj. GPU mem util = 0.95.' },
+  { id:'s6',  sec:'SECAO 6',  icon:'🧠', name:'SFT Warmup',    badge:'b-pu',
+    desc:'1000 steps supervisionado + early stopping',
+    detail:'SFTTrainer com packing=True, paged_adamw_8bit, batch=4, grad_accum=4. Early stopping patience=5. Avalia a cada 100 steps. Resume de checkpoint se existir.' },
+  { id:'s7',  sec:'SECAO 7',  icon:'🏆', name:'Rewards (8)',   badge:'b-cy',
+    desc:'format · compilation · spatial · cure…',
+    detail:'R1 format (XML tags), R2 compilation (glslang+node+ast real), R3 quality (keywords), R4 spatial (3D-SPO), R5 cure (testes+sandbox), R6 reasoning (P-GRPO), R7 conciseness, R8 api_modernity.' },
+  { id:'s9',  sec:'SECAO 9',  icon:'🔥', name:'GRPO Training', badge:'b-or',
+    desc:'3000 steps · 16 completions/prompt',
+    detail:'GRPOTrainer com MO-GRPO Z-Score robusto (mediana/MAD, window=500). Weight scheduling em 4 milestones. Compilação real com cache por hash (10k entradas).' },
+  { id:'s10', sec:'SECAO 10', icon:'💿', name:'Salvamento',    badge:'b-cy',
+    desc:'merged-16bit · LoRA-only · GGUF q8+q5',
+    detail:'Salva 3 formatos no Drive: merged 16-bit, LoRA adapter apenas, GGUF q8_0 e q5_k_m. Opcionalmente faz push para HuggingFace Hub.' },
+  { id:'s11', sec:'SECAO 11', icon:'🎉', name:'Concluído!',    badge:'b-gn',
+    desc:'Pipeline v3 completo',
+    detail:'Imprime resumo completo com todos os changelogs aplicados, caminhos dos outputs e instruções de uso.' },
+];
+
+// build pipeline UI
+(function() {
+  const c = document.getElementById('pl-container');
+  c.innerHTML = PL.map((s, i) => `
+    <div class="pl-stage" id="pl-${s.id}" onclick="openStageDrawer('${s.id}')">
+      <div class="pl-stage-card">
+        <div class="pl-icon-wrap">
+          <span>${s.icon}</span>
+          <div class="pl-spin"></div>
+        </div>
+        <div class="pl-body">
+          <div class="pl-name">${s.name}</div>
+          <div class="pl-desc">${s.desc}</div>
+          <div class="pl-meta"><span class="badge b-dim" id="plb-${s.id}">AGUARDANDO</span></div>
+        </div>
+        <div class="pl-right">
+          <div class="pl-chevron">›</div>
+        </div>
+      </div>
+      ${i < PL.length - 1 ? '<div class="pl-connector"></div>' : ''}
+    </div>`
+  ).join('');
+})();
+
+const SI = {
+  idle:{ icon:'⏸️', title:'Aguardando início',         sub:'Execute o pipeline para começar o treinamento', badge:'IDLE',       bc:'b-dim'},
+  s1:  { icon:'🔍', title:'Verificando VRAM',           sub:'Checando memória livre na A100 80GB…',           badge:'VRAM CHECK', bc:'b-cy' },
+  s2:  { icon:'📦', title:'Instalando pacotes',         sub:'unsloth · vllm · glslang-tools · node.js',       badge:'INSTALL',    bc:'b-cy' },
+  s3:  { icon:'💾', title:'Montando Google Drive',      sub:'Criando estrutura de pastas no Drive…',          badge:'DRIVE',      bc:'b-yl' },
+  s4:  { icon:'🗃️', title:'Carregando Datasets',        sub:'5 datasets em paralelo + curriculum sort',       badge:'DATASET',    bc:'b-cy' },
+  s5:  { icon:'🤖', title:'Carregando Modelo + LoRA',   sub:'Qwen2.5-Coder-7B-bnb-4bit · LoRA r=64',          badge:'MODELO',     bc:'b-cy' },
+  s6:  { icon:'🧠', title:'SFT Warmup ativo',           sub:'Supervisionado · 1000 steps · early stopping',   badge:'SFT  🧠',    bc:'b-pu' },
+  s7:  { icon:'🏆', title:'Compilando Reward Funcs',    sub:'8 funções: format/compilation/spatial/cure…',    badge:'REWARDS',    bc:'b-cy' },
+  s9:  { icon:'🔥', title:'GRPO Treinando!',            sub:'16 completions/prompt · MO-GRPO Z-Score',         badge:'GRPO  🔥',   bc:'b-or' },
+  s10: { icon:'💿', title:'Salvando modelo final',      sub:'merged-16bit · LoRA-only · GGUF q8+q5…',         badge:'SALVANDO',   bc:'b-cy' },
+  s11: { icon:'🎉', title:'Pipeline concluído!',        sub:'Modelo treinado e salvo no Google Drive ✓',       badge:'DONE ✓',     bc:'b-gn' },
+};
+
+function setStage(key) {
+  if (S.stage === key) return;
+  const prev = S.stage;
+  S.stage = key;
+
+  // hero
+  const info = SI[key] || SI.idle;
+  document.getElementById('ph-icon').textContent = info.icon;
+  document.getElementById('ph-title').textContent = info.title;
+  document.getElementById('ph-sub').textContent   = info.sub;
+  const b = document.getElementById('ph-badge');
+  b.textContent = info.badge; b.className = `badge ${info.bc}`;
+
+  // pipeline steps
+  const idx = PL.findIndex(s => s.id === key);
+  PL.forEach((s, i) => {
+    const el = document.getElementById(`pl-${s.id}`);
+    const bl = document.getElementById(`plb-${s.id}`);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (idx >= 0) {
+      if (i < idx) {
+        el.classList.add('done');
+        if (bl) { bl.textContent = 'CONCLUÍDO'; bl.className = 'badge b-gn'; }
+      } else if (i === idx) {
+        el.classList.add('active');
+        if (bl) { bl.textContent = 'ATIVO'; bl.className = `badge ${s.badge}`; }
+      } else {
+        if (bl) { bl.textContent = 'AGUARDANDO'; bl.className = 'badge b-dim'; }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════
+function goto(name) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById(`scr-${name}`).classList.add('on');
+  document.getElementById(`nav-${name}`).classList.add('on');
+  if (name === 'logs') { document.getElementById('nd-logs').classList.remove('on'); setTimeout(scrollBot, 60); }
+}
+if (S.url) document.getElementById('url-input').value = S.url;
+
+// ══════════════════════════════════════════════════
+// CONNECT
+// ══════════════════════════════════════════════════
+async function doConnect() {
+  const raw = document.getElementById('url-input').value.trim().replace(/\/+$/, '');
+  if (!raw) { toast('⚠️ Cole a URL'); return; }
+  S.url = raw;
+  const btn = document.getElementById('btn-conn');
+  const st  = document.getElementById('conn-status');
+  btn.textContent = '…'; btn.disabled = true;
+  st.style.display = 'flex';
+  st.innerHTML = `<span class="sd sd-or"></span> Conectando…`;
+  try {
+    const r = await fetch(`${S.url}/ping`, { signal: AbortSignal.timeout(9000) });
+    const d = await r.json();
+    if (!d.ok) throw new Error('bad');
+    S.connected = true;
+    localStorage.setItem('colab_url', S.url);
+    let html = `<span class="sd sd-gn"></span><b style="color:var(--gn)">Conectado!</b>`;
+    if (d.gpu) html += ` &nbsp;<span style="color:var(--td)">${d.gpu}</span>`;
+    if (d.vram) {
+      updateVram(d.vram);
+      html += `<br><span style="font-family:var(--mono);font-size:10px;color:var(--tdd)">VRAM: ${d.vram.alloc}GB alloc / ${d.vram.free}GB free / ${d.vram.total}GB total</span>`;
+    }
+    st.innerHTML = html;
+    document.getElementById('nav-connect').style.color = 'var(--gn)';
+    document.getElementById('nd-conn').classList.add('on');
+    document.getElementById('restart-zone').style.display = 'flex';
+    toast('✅ Colab conectado!');
+    renderCells();
+  } catch(e) {
+    st.innerHTML = `<span class="sd sd-rd"></span> Falha: ${e.message}`;
+    toast('❌ Sem resposta');
+    S.connected = false;
+  }
+  btn.textContent = 'Conectar'; btn.disabled = false;
+}
+if (S.url) setTimeout(doConnect, 700);
+
+// ══════════════════════════════════════════════════
+// RESTART RUNTIME
+// ══════════════════════════════════════════════════
+async function doRestart() {
+  if (!S.connected) { toast('❌ Não conectado'); return; }
+  if (!confirm('⚠️ Reiniciar o runtime vai perder tudo que não foi salvo no Drive. Continuar?')) return;
+  try {
+    await fetch(`${S.url}/restart`, { method:'POST', signal: AbortSignal.timeout(5000) });
+    toast('🔄 Reiniciando… aguarde ~20s');
+    S.connected = false;
+    document.getElementById('nd-conn').classList.remove('on');
+    document.getElementById('restart-zone').style.display = 'none';
+    document.getElementById('conn-status').innerHTML = `<span class="sd sd-or"></span> Runtime reiniciando…`;
+    // try to reconnect after 20s
+    setTimeout(doConnect, 22000);
+  } catch(e) { toast('❌ Falha ao reiniciar'); }
+}
+
+// ══════════════════════════════════════════════════
+// CELLS
+// ══════════════════════════════════════════════════
+let _ci = S.cells.length;
+
+function saveCells() {
+  localStorage.setItem('cells', JSON.stringify(S.cells.map(c => ({id:c.id,title:c.title,code:c.code}))));
+}
+
+function addCell(code='', title='Nova célula') {
+  const id = 'c'+(++_ci);
+  S.cells.push({id, title, code, status:'idle', output:''});
+  saveCells(); renderCells();
+  setTimeout(() => {
+    const el = document.getElementById(`cc-${id}`);
+    if (el) { el.focus(); el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 80);
+}
+
+function renderCells() {
+  const list = document.getElementById('cells-list');
+  if (!S.cells.length) {
+    list.innerHTML = `<div class="card" style="text-align:center;padding:32px;color:var(--tdd)">
+      <div style="font-size:32px;margin-bottom:8px">📝</div>
+      <div style="font-family:var(--orb);font-size:10px;letter-spacing:.5px">SEM CÉLULAS — ADICIONE OU USE PRESET</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = S.cells.map((c,i) => {
+    const cls={idle:'',running:'running',done:'done',error:'error',cancelled:'cancelled'}[c.status]||'';
+    const stlbl = {
+      idle:'',
+      running:`<span class="rund"></span><span style="color:var(--cy);font-size:10px">EXECUTANDO</span>`,
+      done:`<span style="color:var(--gn);font-size:10px">✓ OK</span>`,
+      error:`<span style="color:var(--rd);font-size:10px">✗ ERRO</span>`,
+      cancelled:`<span style="color:var(--or);font-size:10px">⊘ CANCELADO</span>`,
+    }[c.status]||'';
+    const cancelBtn = c.status==='running'
+      ? `<button class="btn btn-or btn-sm" onclick="cancelCell('${c.id}')">⊘ Cancelar</button>` : '';
+    return `<div class="cell ${cls}" id="cell-${c.id}">
+      <div class="cell-hdr">
+        <span class="cell-idx orb-title">[${i+1}]</span>
+        <span class="cell-ttl">${esc(c.title)}</span>
+        <span class="cell-st">${stlbl}</span>
+      </div>
+      <div id="cbody-${c.id}">
+        <textarea class="cell-code" id="cc-${c.id}" rows="5"
+          placeholder="# Cole seu código Python aqui…"
+          oninput="updCode('${c.id}',this.value)">${esc(c.code)}</textarea>
+        <div class="cell-out ${c.output?'on':''}" id="co-${c.id}">${fmtOut(c.output)}</div>
+        <div class="cell-acts">
+          <button class="btn btn-gn btn-sm" onclick="runCell('${c.id}')">▶ Run</button>
+          ${cancelBtn}
+          <div class="acts-r">
+            <button class="btn btn-ghost btn-xs" onclick="renCell('${c.id}')">✏️</button>
+            <button class="btn btn-rd btn-xs" onclick="delCell('${c.id}')">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updCode(id,v){const c=S.cells.find(x=>x.id===id);if(c){c.code=v;saveCells();}}
+function delCell(id){S.cells=S.cells.filter(c=>c.id!==id);saveCells();renderCells();}
+function renCell(id){
+  const c=S.cells.find(x=>x.id===id);if(!c) return;
+  const t=prompt('Nome:',c.title);if(t!==null){c.title=t.trim()||c.title;saveCells();renderCells();}
+}
+
+// ══════════════════════════════════════════════════
+// RUN — fetch + ReadableStream
+// ══════════════════════════════════════════════════
+async function runCell(id) {
+  if (!S.connected) { toast('❌ Conecte primeiro'); goto('connect'); return; }
+  const c = S.cells.find(x=>x.id===id);
+  if (!c || c.status==='running') return;
+  c.status='running'; c.output=''; S.currentCid=id;
+  renderCells();
+
+  // open drawer immediately
+  openDrawer(c.title, id);
+
+  try {
+    const r = await fetch(`${S.url}/run`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id, code:c.code}),
+      signal:AbortSignal.timeout(10000)
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error('server err');
+    await doStream(id);
+  } catch(e) {
+    c.status='error'; c.output+=`\nErro: ${e.message}`;
+    renderCells(); closeDrawer();
+    toast('❌ Falha ao executar');
+  }
+}
+
+async function doStream(id) {
+  const c = S.cells.find(x=>x.id===id); if(!c) return;
+  let firstLine = true;
+
+  try {
+    const resp = await fetch(`${S.url}/stream/${id}`,{
+      headers:{'Accept':'text/event-stream','Cache-Control':'no-cache'}
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const reader = resp.body.getReader();
+    S.readers[id] = reader;
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const {done,value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value,{stream:true});
+
+      let nl;
+      while ((nl=buf.indexOf('\n')) !== -1) {
+        const line = buf.slice(0,nl); buf=buf.slice(nl+1);
+        if (!line.startsWith('data:')) continue;
+        const raw=line.slice(5).trim(); if(!raw) continue;
+        let msg; try{msg=JSON.parse(raw);}catch{continue;}
+        if (msg.t==='hb') continue;
+
+        if (msg.t==='o') {
+          // First output flash notification
+          if (firstLine) {
+            const firstReal = msg.v.split('\n').find(l=>l.trim());
+            if (firstReal) showFlash(firstReal);
+            firstLine = false;
+            appendLog(`\n── ▶ [${c.title}] ──────────────────────────\n`);
+          }
+          c.output += msg.v;
+
+          // Update cell output area
+          const outEl=document.getElementById(`co-${id}`);
+          if (outEl) { outEl.classList.add('on'); outEl.innerHTML=fmtOut(c.output); outEl.scrollTop=outEl.scrollHeight; }
+
+          // Update live drawer
+          appendToDrawer(msg.v);
+
+          // Parse for dashboard
+          parseLine(msg.v);
+          appendLog(msg.v);
+        }
+
+        if (msg.t==='done') {
+          delete S.readers[id];
+          const s=msg.s;
+          c.status=s==='ok'?'done':s==='cancelled'?'cancelled':'error';
+          if (S.currentCid===id) {
+            S.currentCid = null;
+            finishDrawer(s);
+          }
+          renderCells();
+          appendLog(`\n[${s==='ok'?'✓ OK':s==='cancelled'?'⊘ CANCELADO':'✗ ERRO'}] Status: ${s}\n`);
+          if (s==='ok') toast('✅ Célula concluída');
+          else if (s==='cancelled') toast('⊘ Cancelado');
+          else if (s!=='exit') toast('❌ Erro na célula');
+          return;
+        }
+      }
+    }
+  } catch(e) {
+    delete S.readers[id];
+    if (c.status==='running') { c.status='error'; c.output+=`\n[stream err] ${e.message}`; renderCells(); closeDrawer(); }
+  }
+}
+
+async function cancelCell(id) {
+  const rdr=S.readers[id]; if(rdr){try{rdr.cancel();}catch{}delete S.readers[id];}
+  try{await fetch(`${S.url}/cancel/${id}`,{method:'POST',signal:AbortSignal.timeout(4000)});}catch{}
+  const c=S.cells.find(x=>x.id===id);
+  if(c){c.status='cancelled';renderCells();}
+  if(S.currentCid===id){S.currentCid=null;closeDrawer();}
+  toast('⊘ Célula cancelada');
+}
+
+function cancelCurrentCell() {
+  if (S.currentCid) cancelCell(S.currentCid);
+}
+
+async function runAll() {
+  if (!S.connected) { toast('❌ Conecte primeiro'); goto('connect'); return; }
+  for (const c of S.cells) {
+    if (!c.code.trim()) continue;
+    c.status='running'; c.output=''; renderCells();
+    try {
+      const r=await fetch(`${S.url}/run`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:c.id,code:c.code})});
+      await r.json();
+      S.currentCid=c.id;
+      openDrawer(c.title, c.id);
+      await doStream(c.id);
+    } catch(e){c.status='error';renderCells();break;}
+    if (c.status==='error') break;
+  }
+  toast('✅ Execução completa');
+}
+
+// ══════════════════════════════════════════════════
+// LIVE OUTPUT DRAWER
+// ══════════════════════════════════════════════════
+let _drawerOpen = false;
+
+function openDrawer(title, cid) {
+  document.getElementById('drawer-title').textContent = `EXECUTANDO — ${title.toUpperCase()}`;
+  document.getElementById('drawer-title').style.color = 'var(--cy)';
+  document.getElementById('drawer-cell-badge').textContent = cid;
+  document.getElementById('drawer-cell-badge').className = 'badge b-cy';
+  document.getElementById('drawer-out').innerHTML = '';
+  document.getElementById('drawer-pulse').style.display = 'block';
+  document.getElementById('drawer-cancel-btn').style.display = '';
+  document.getElementById('live-drawer').classList.add('open');
+  document.getElementById('live-bg').classList.add('on');
+  _drawerOpen = true;
+}
+
+function appendToDrawer(text) {
+  const out = document.getElementById('drawer-out');
+  const span = document.createElement('span');
+  span.innerHTML = fmtOut(text);
+  out.appendChild(span);
+  out.scrollTop = out.scrollHeight;
+}
+
+function finishDrawer(status) {
+  document.getElementById('drawer-pulse').style.display = 'none';
+  document.getElementById('drawer-cancel-btn').style.display = 'none';
+  const ok = status==='ok';
+  document.getElementById('drawer-title').textContent = ok ? '✓ CONCLUÍDO' : status==='cancelled' ? '⊘ CANCELADO' : '✗ ERRO';
+  document.getElementById('drawer-title').style.color = ok?'var(--gn)':status==='cancelled'?'var(--or)':'var(--rd)';
+}
+
+function closeDrawer() {
+  document.getElementById('live-drawer').classList.remove('open');
+  document.getElementById('live-bg').classList.remove('on');
+  _drawerOpen = false;
+  setTimeout(() => {
+    document.getElementById('drawer-title').style.color = '';
+  }, 400);
+}
+
+// ══════════════════════════════════════════════════
+// STAGE DETAIL DRAWER
+// ══════════════════════════════════════════════════
+function openStageDrawer(stageId) {
+  const stage = PL.find(s=>s.id===stageId);
+  if (!stage) return;
+  S.activeStage = stageId;
+
+  document.getElementById('sd-icon').textContent = stage.icon;
+  document.getElementById('sd-title').textContent = stage.name;
+  document.getElementById('sd-sub').textContent = stage.desc;
+  const b = document.getElementById('sd-badge');
+  b.className = `badge ${stage.badge}`;
+  const el = document.getElementById(`pl-${stageId}`);
+  b.textContent = el.classList.contains('done')?'CONCLUÍDO':el.classList.contains('active')?'ATIVO':'AGUARDANDO';
+
+  document.getElementById('sd-extra').textContent = stage.detail;
+
+  // fill log with filtered output for this stage
+  const log = S.stageLogs[stageId] || '';
+  const logEl = document.getElementById('sd-log');
+  logEl.innerHTML = log ? fmtOut(log) : '<span style="color:var(--tdd)">Sem output para esta seção ainda…</span>';
+  setTimeout(()=>{ logEl.scrollTop = logEl.scrollHeight; }, 50);
+
+  document.getElementById('sdrawer-bg').classList.add('on');
+  document.getElementById('stage-drawer').classList.add('open');
+}
+
+function closeStageDrawer() {
+  document.getElementById('stage-drawer').classList.remove('open');
+  document.getElementById('sdrawer-bg').classList.remove('on');
+  S.activeStage = null;
+}
+
+// Track which stage's logs we're accumulating
+let _currentLogStage = null;
+function routeLineToStage(line) {
+  // detect stage change
+  const sm = line.match(/SECAO\s*(\d+)/i);
+  if (sm) {
+    const n = parseInt(sm[1]);
+    const map = {1:'s1',2:'s2',3:'s3',4:'s4',5:'s5',6:'s6',7:'s7',9:'s9',10:'s10',11:'s11'};
+    if (map[n]) _currentLogStage = map[n];
+  }
+  if (/PIPELINE v\d+ CONCLUIDO/i.test(line)) _currentLogStage = 's11';
+
+  // append to current stage log
+  if (_currentLogStage) {
+    if (!S.stageLogs[_currentLogStage]) S.stageLogs[_currentLogStage] = '';
+    S.stageLogs[_currentLogStage] += line + '\n';
+
+    // live-update stage drawer if open
+    if (S.activeStage === _currentLogStage) {
+      const logEl = document.getElementById('sd-log');
+      logEl.innerHTML = fmtOut(S.stageLogs[_currentLogStage]);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════
+// FIRST OUTPUT FLASH
+// ══════════════════════════════════════════════════
+let _flashTimer;
+function showFlash(text) {
+  const el = document.getElementById('output-flash');
+  document.getElementById('flash-text').textContent = text;
+  el.classList.add('show');
+  clearTimeout(_flashTimer);
+  _flashTimer = setTimeout(()=>el.classList.remove('show'), 3500);
+}
+
+// ══════════════════════════════════════════════════
+// PARSE OUTPUT → DASHBOARD
+// ══════════════════════════════════════════════════
+function parseLine(text) {
+  for (const line of text.split('\n')) {
+    const l=line.trim(); if(!l) continue;
+
+    routeLineToStage(l);
+
+    // Stage detection
+    const sm=l.match(/SECAO\s*(\d+)/i);
+    if (sm) {
+      const n=parseInt(sm[1]);
+      const map={1:'s1',2:'s2',3:'s3',4:'s4',5:'s5',6:'s6',7:'s7',9:'s9',10:'s10',11:'s11'};
+      if (map[n]) setStage(map[n]);
+    }
+    if (/PIPELINE v\d+ CONCLUIDO/i.test(l)) setStage('s11');
+
+    // SFT step
+    const sM=l.match(/'loss':\s*([\d.]+).*?'step':\s*(\d+)/);
+    if(sM){S.loss=parseFloat(sM[1]);S.sftStep=parseInt(sM[2]);S.step=S.sftStep;}
+
+    // GRPO step
+    const gM=l.match(/\bstep\s+(\d+)\s*:/i);
+    if(gM){
+      S.grpoStep=parseInt(gM[1]);S.step=S.grpoStep;
+      for(const m of l.matchAll(/'(?:reward\/?)?(\w+)':\s*([-\d.]+)/g))S.reward[m[1]]=parseFloat(m[2]);
+    }
+
+    // MO-GRPO
+    const moM=l.match(/\[MO-GRPO step\s+(\d+)\]/);
+    if(moM){
+      S.grpoStep=parseInt(moM[1]);S.step=S.grpoStep;
+      for(const m of l.matchAll(/'(\w+)':\s*\{[^}]*'raw_mean':\s*([-\d.]+)/g))S.reward[m[1]]=parseFloat(m[2]);
+    }
+
+    // loss
+    const lM=l.match(/'loss':\s*([\d.]+)/); if(lM) S.loss=parseFloat(lM[1]);
+
+    // combined reward
+    const cM=l.match(/'rewards\/mean':\s*([-\d.]+)/);
+    if(cM){
+      S.combinedReward=parseFloat(cM[1]);
+      if(S.grpoStep>0){S.rewardHistory.push({step:S.grpoStep,reward:S.combinedReward});if(S.rewardHistory.length>200)S.rewardHistory.shift();}
+    }
+
+    // VRAM
+    const vM=l.match(/alloc=([\d.]+)G\s+reserved=([\d.]+)G\s+free=([\d.]+)G/i);
+    if(vM){S.vram={alloc:parseFloat(vM[1]),reserved:parseFloat(vM[2]),free:parseFloat(vM[3]),total:80};updateVram(S.vram);}
+
+    updateDash();
+  }
+}
+
+function updateDash() {
+  const maxStep = S.stage==='s6' ? S.sftMax : S.grpoMax;
+  document.getElementById('m-step').textContent  = S.step>0?S.step.toLocaleString():'—';
+  document.getElementById('m-rw').textContent    = S.combinedReward!=null?S.combinedReward.toFixed(3):'—';
+  document.getElementById('m-loss').textContent  = S.loss!=null?S.loss.toFixed(4):'—';
+  document.getElementById('m-vfree').textContent = S.vram?`${S.vram.free}GB`:'—';
+
+  document.getElementById('mb-step').style.width  = S.step>0?Math.min(S.step/maxStep*100,100)+'%':'0%';
+  document.getElementById('mb-vfree').style.width = S.vram?Math.min(S.vram.free/80*100,100)+'%':'0%';
+
+  const showP = S.stage==='s6'||S.stage==='s9';
+  document.getElementById('prog-card').style.display = showP?'':'none';
+  if(showP){
+    const cur=S.stage==='s6'?S.sftStep:S.grpoStep;
+    const max=S.stage==='s6'?S.sftMax:S.grpoMax;
+    const pct=Math.min(cur/max*100,100);
+    document.getElementById('prog-fill').style.width=pct+'%';
+    document.getElementById('prog-cur').textContent=cur.toLocaleString();
+    document.getElementById('prog-pct').textContent=pct.toFixed(1)+'%';
+    document.getElementById('prog-max').textContent=max.toLocaleString()+' steps';
+    document.getElementById('prog-badge').textContent=`${cur.toLocaleString()} / ${max.toLocaleString()}`;
+  }
+
+  const hasH=S.rewardHistory.length>0;
+  document.getElementById('chart-card').style.display=hasH?'':'none';
+  if(hasH){document.getElementById('chart-badge').textContent=`${S.rewardHistory.length} pts`;updateChart();}
+
+  const hasRw=Object.keys(S.reward).length>0;
+  document.getElementById('rw-card').style.display=hasRw?'':'none';
+  if(hasRw)updateRwBars();
+}
+
+function updateVram(v) {
+  const tot=v.total||80;const pct=Math.min(v.alloc/tot*100,100);
+  const bar=document.getElementById('vbar');
+  bar.style.width=pct+'%';
+  bar.style.background=pct>90?'var(--rd)':pct>75?'var(--or)':'var(--gn)';
+  document.getElementById('vc-a').textContent=v.alloc+'GB';
+  document.getElementById('vc-f').textContent=v.free+'GB';
+  document.getElementById('vc-t').textContent=tot+'GB';
+  document.getElementById('m-vfree').textContent=v.free+'GB';
+  document.getElementById('mb-vfree').style.width=Math.min(v.free/tot*100,100)+'%';
+}
+
+// ══════════════════════════════════════════════════
+// CHART
+// ══════════════════════════════════════════════════
+function updateChart() {
+  const canvas=document.getElementById('rwchart');
+  const labels=S.rewardHistory.map(r=>r.step);
+  const data=S.rewardHistory.map(r=>r.reward);
+  if(!S.chart){
+    S.chart=new Chart(canvas,{
+      type:'line',
+      data:{labels,datasets:[{data,borderColor:'#00f0ff',backgroundColor:'rgba(0,240,255,.06)',borderWidth:2,pointRadius:0,tension:.4,fill:true}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,animation:{duration:200},
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#06061a',borderColor:'#1e1e50',borderWidth:1,titleColor:'#2a2a5a',bodyColor:'#c8d8ff',padding:8,callbacks:{label:ctx=>`Reward: ${ctx.raw.toFixed(4)}`}}},
+        scales:{x:{ticks:{color:'#2a2a5a',maxTicksLimit:5,font:{family:'JetBrains Mono',size:9}},grid:{color:'rgba(0,240,255,.04)'}},y:{ticks:{color:'#2a2a5a',font:{family:'JetBrains Mono',size:9}},grid:{color:'rgba(0,240,255,.04)'}}}
+      }
+    });
+  } else {
+    S.chart.data.labels=labels;S.chart.data.datasets[0].data=data;S.chart.update('none');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// REWARD BARS
+// ══════════════════════════════════════════════════
+const RWC={format:'#00f0ff',compilation:'#00ff88',quality:'#ffd60a',spatial:'#bf5af2',cure:'#ff6b35',reasoning:'#ff2d55',conciseness:'#64d2ff',api_modernity:'#30d158'};
+const RWM={format:2,compilation:3,quality:2,spatial:2.5,cure:2.5,reasoning:1.5,conciseness:.5,api_modernity:1};
+function updateRwBars(){
+  document.getElementById('rw-rows').innerHTML=Object.keys(S.reward).map(k=>{
+    const v=S.reward[k]||0,max=RWM[k]||2,pct=Math.max(0,Math.min(v/max*100,100));
+    const col=RWC[k]||'#fff';const neg=v<0;
+    return `<div class="rw"><span class="rw-n">${k}</span><div class="rw-track"><div class="rw-fill" style="width:${neg?0:pct}%;background:${col}"></div></div><span class="rw-v" style="color:${neg?'var(--rd)':col}">${v.toFixed(3)}</span></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════════════════
+function appendLog(text) {
+  const w=document.getElementById('log-wrap');
+  const emp=w.querySelector('.log-empty');if(emp)emp.remove();
+  const s=document.createElement('span');s.innerHTML=fmtOut(text);w.appendChild(s);
+  if(w.scrollHeight-w.scrollTop<w.clientHeight+120)w.scrollTop=w.scrollHeight;
+  if(!document.getElementById('scr-logs').classList.contains('on'))
+    document.getElementById('nd-logs').classList.add('on');
+}
+function clearLogs(){document.getElementById('log-wrap').innerHTML='<div class="log-empty">Limpo</div>';toast('🗑️ Limpo');}
+function scrollBot(){const w=document.getElementById('log-wrap');w.scrollTop=w.scrollHeight;}
+
+// ══════════════════════════════════════════════════
+// FORMAT OUTPUT
+// ══════════════════════════════════════════════════
+function fmtOut(text) {
+  if (!text) return '';
+  return text.split('\n').map(line=>{
+    const e=esc(line);
+    if (/SECAO\s*\d+.*[:—]/i.test(line)||/PIPELINE v\d+/.test(line)) return `<span class="o-sec">${e}</span>`;
+    if (/={3,}|─{3,}|▶ \[/.test(line))                               return `<span class="o-hdr">${e}</span>`;
+    if (/error|traceback|exception|failed|falhou|OOM/i.test(line))   return `<span class="o-err">${e}</span>`;
+    if (/warning|warn|aviso/i.test(line))                             return `<span class="o-warn">${e}</span>`;
+    if (/alloc=.*free=/i.test(line)||/VRAM.*alloc/i.test(line))       return `<span class="o-vram">${e}</span>`;
+    if (/step\s+\d+.*reward|MO-GRPO/i.test(line))                    return `<span class="o-step">${e}</span>`;
+    if (/concluido|CONCLUIDO|ok\b|salvo|done|✓|✅/i.test(line))      return `<span class="o-ok">${e}</span>`;
+    if (/drive|Drive|mount/i.test(line))                              return `<span class="o-drive">${e}</span>`;
+    if (/BRIDGE ATIVA|trycloudflare\.com/i.test(line))                return `<span class="o-info">${e}</span>`;
+    if (/^\[\d{2}:\d{2}:\d{2}\]/.test(line))
+      return `<span class="o-ts">${e.slice(0,11)}</span>${e.slice(11)}`;
+    return e;
+  }).join('\n');
+}
+
+// ══════════════════════════════════════════════════
+// PRESETS
+// ══════════════════════════════════════════════════
+const PRESETS = [
+  { title:'🌉 Bridge Cloudflare v3 (obrigatório)', code: BOOTSTRAP },
+  { title:'📊 Status VRAM + GPU',
+    code:`import torch
+if torch.cuda.is_available():
+    f,tot=torch.cuda.mem_get_info(); a=torch.cuda.memory_allocated()
+    print(f"GPU    : {torch.cuda.get_device_name(0)}")
+    print(f"Alloc  : {round(a/1e9,1)} GB")
+    print(f"Free   : {round(f/1e9,1)} GB")  
+    print(f"Total  : {round(tot/1e9,1)} GB")
+    print(f"VRAM after step: alloc={round(a/1e9,1)}G  reserved=0G  free={round(f/1e9,1)}G")
+else: print("Sem GPU")` },
+  { title:'🔥 Teste GRPO mock (todas as seções)',
+    code:`import time,random
+print("="*60); print("SECAO 1: CHECAGEM DE VRAM"); print("="*60)
+print("GPU   : NVIDIA A100-SXM4-80GB"); print("VRAM  : 79.2 / 80.0 GB livres"); print("VRAM OK")
+time.sleep(.3)
+print("\\n"+"="*60); print("SECAO 9: GRPO TRAINING"); print("="*60)
+for i in range(1,20):
+    step=i*100
+    rw={k:round(random.uniform(.1,1.5),3) for k in ['format','compilation','spatial','cure','reasoning']}
+    combined=round(sum(rw.values())/len(rw),3); loss=round(random.uniform(.1,.5),4)
+    alloc=round(random.uniform(18,32),1); free=round(80-alloc-8,1)
+    print(f"[{i:02d}:00:{i:02d}] step {step}: {{'reward/format':{rw['format']},'reward/compilation':{rw['compilation']},'rewards/mean':{combined},'loss':{loss}}}")
+    print(f"[{i:02d}:00:{i:02d}]   VRAM after step: alloc={alloc}G  reserved=8.0G  free={free}G")
+    time.sleep(.25)
+print("="*60); print("PIPELINE v3 CONCLUIDO!"); print("="*60)` },
+  { title:'🗂️ Pipeline v3 completo (cole aqui)',
+    code:`# Cole o pipeline_v3.py completo aqui
+# Seções detectadas automaticamente:
+# SECAO 1 → SECAO 2 → ... → SECAO 11
+# Dashboard atualiza em tempo real
+print("Cole o pipeline_v3.py aqui")` },
+  { title:'💡 Inspecionar namespace do Colab',
+    code:`print("Variáveis no namespace:")
+for k,v in sorted(globals().items()):
+    if not k.startswith('_'):
+        try: print(f"  {k:20s} = {str(v)[:80]}")
+        except: pass` },
+];
+
+function showPresets() {
+  document.getElementById('presets-list').innerHTML = PRESETS.map((p,i)=>`
+    <div class="card" style="cursor:pointer;margin-bottom:8px;padding:12px;border-color:var(--bd2)" onclick="insPreset(${i})">
+      <div style="font-family:var(--orb);font-size:11px;font-weight:700;letter-spacing:.3px">${p.title}</div>
+      <div style="font-size:10px;color:var(--tdd);margin-top:4px;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.code.split('\n').find(l=>l.trim()&&!l.startsWith('#'))||p.code.split('\n')[0])}</div>
+    </div>`).join('');
+  document.getElementById('modal-bg').classList.add('on');
+  document.getElementById('modal').style.transform='translateY(0)';
+}
+function insPreset(i){addCell(PRESETS[i].code,PRESETS[i].title);closeModal();toast(`✅ Adicionado`);}
+function closeModal(){
+  document.getElementById('modal').style.transform='translateY(100%)';
+  document.getElementById('modal-bg').classList.remove('on');
+}
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function copySnippet() {
+  navigator.clipboard.writeText(BOOTSTRAP).then(()=>toast('⎘ Copiado!'))
+    .catch(()=>{const ta=document.createElement('textarea');ta.value=BOOTSTRAP;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('⎘ Copiado!');});
+}
+
+let _tT;
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');
+  clearTimeout(_tT);_tT=setTimeout(()=>el.classList.remove('on'),2600);
+}
+
+
+// ══════════════════════════════════════════════════
+// AI — CLAUDE INTEGRATION
+// ══════════════════════════════════════════════════
+const AI = {
+  key: localStorage.getItem('ai_key') || '',
+  model: localStorage.getItem('ai_model') || 'anthropic/claude-sonnet-4-5',
+  provider: localStorage.getItem('ai_provider') || 'openrouter',
+  connected: false,
+  history: [],
+  autoCancel: true,
+  lowRewardCount: 0,
+  LOW_REWARD_THRESHOLD: 0.50,
+  LOW_REWARD_STEPS: 3,
+};
+
+const AI_SYSTEM = `Você é um assistente especialista em treinamento de LLMs, GRPO, SFT e o pipeline Qwen2.5-Coder-7B rodando no Google Colab A100 80GB.
+Você responde em português do Brasil, de forma objetiva e técnica.
+Quando analisar erros, sugira correções concretas para o código Python.
+Quando o reward estiver baixo, analise os reward functions e sugira ajustes de hiperparâmetros.`;
+
+// ── Detect key type ──
+function detectKeyType(key) {
+  if (key.startsWith('sk-or-')) return 'openrouter';
+  if (key.startsWith('sk-ant-')) return 'anthropic';
+  if (key.startsWith('sk-')) return 'openai';
+  if (key.startsWith('AIza')) return 'google';
+  return null;
+}
+
+function keyLabel(type) {
+  return { openrouter:'OpenRouter', anthropic:'Anthropic', openai:'OpenAI', google:'Google AI' }[type] || 'Desconhecido';
+}
+
+// Live key detection while typing
+document.getElementById('ai-key-input').addEventListener('input', function() {
+  const type = detectKeyType(this.value.trim());
+  const badge = document.getElementById('ai-detected-badge');
+  if (type === 'openrouter') {
+    badge.style.display = 'block';
+    badge.innerHTML = `<span class="badge b-gn">✓ OpenRouter detectado</span>`;
+  } else if (type) {
+    badge.style.display = 'block';
+    badge.innerHTML = `<span class="badge b-or">⚠️ ${keyLabel(type)} — use OpenRouter (sk-or-v1-…)</span>`;
+  } else {
+    badge.style.display = this.value.length > 4 ? 'block' : 'none';
+    badge.innerHTML = `<span class="badge b-dim">Formato não reconhecido</span>`;
+  }
+});
+
+// Init: load saved key
+(function initAI() {
+  if (AI.key) {
+    document.getElementById('ai-key-input').value = AI.key;
+    const sel = document.getElementById('ai-model-sel');
+    // try to set saved model
+    const opt = [...sel.options].find(o => o.value === AI.model);
+    if (opt) sel.value = AI.model;
+    AI.connected = true;
+    showAIChat();
+  }
+})();
+
+async function validateApiKey() {
+  const key = document.getElementById('ai-key-input').value.trim();
+  const type = detectKeyType(key);
+
+  if (!key) { setAIKeyStatus('❌ Cole sua chave aqui', 'rd'); return; }
+  if (type !== 'openrouter') {
+    setAIKeyStatus(`❌ Use uma chave OpenRouter (sk-or-v1-…) — detectado: ${keyLabel(type) || 'formato inválido'}`, 'rd');
+    return;
+  }
+
+  const btn = document.getElementById('ai-validate-btn');
+  btn.textContent = '…'; btn.disabled = true;
+  setAIKeyStatus('⏳ Validando com OpenRouter…', 'td');
+
+  try {
+    const model = document.getElementById('ai-model-sel').value;
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+        'HTTP-Referer': 'https://qwen-trainer.app',
+        'X-Title': 'Qwen Trainer'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 5,
+        messages: [{ role: 'user', content: 'ok' }]
+      }),
+      signal: AbortSignal.timeout(15000)
+    });
+    const d = await r.json();
+
+    if (d.error) {
+      setAIKeyStatus(`❌ ${d.error.message || JSON.stringify(d.error)}`, 'rd');
+    } else {
+      const usedModel = d.model || model;  // OpenRouter returns actual model used
+      AI.key = key;
+      AI.model = model;  // keep selected model for future calls
+      AI.provider = 'openrouter';
+      localStorage.setItem('ai_key', key);
+      localStorage.setItem('ai_model', model);
+      localStorage.setItem('ai_provider', 'openrouter');
+      AI.connected = true;
+      setAIKeyStatus(`✅ Conectado · modelo: ${usedModel.split('/').pop()}`, 'gn');
+      toast('✅ IA conectada via OpenRouter!');
+      setTimeout(() => showAIChat(usedModel), 600);
+    }
+  } catch(e) {
+    setAIKeyStatus(`❌ Erro de rede: ${e.message}`, 'rd');
+  }
+  btn.textContent = 'Validar'; btn.disabled = false;
+}
+
+function setAIKeyStatus(msg, color) {
+  const el = document.getElementById('ai-key-status');
+  el.textContent = msg;
+  el.style.color = `var(--${color})`;
+}
+
+function showAIChat(modelOverride) {
+  const modelId = modelOverride || AI.model;
+  document.getElementById('ai-setup').style.display = 'none';
+  const chat = document.getElementById('ai-chat');
+  chat.style.display = 'flex';
+  const shortModel = modelId.includes('/') ? modelId.split('/').pop() : modelId;
+  document.getElementById('ai-model-label').textContent = `via OpenRouter · ${shortModel}`;
+  document.getElementById('nd-ai').classList.add('on');
+  if (AI.history.length === 0) {
+    // Ask the model to introduce itself — it will say its real name
+    const typing = addAITyping();
+    callAI(
+      'Apresente-se em 2 linhas: diga seu nome real e que você está monitorando o treinamento Qwen2.5-Coder-7B. Depois liste em 3 bullets rápidos: análise de erros, auto-cancel reward baixo, chat de dúvidas.',
+      { fresh: true, maxTokens: 150 }
+    ).then(reply => {
+      typing.remove();
+      // push directly without adding to history again (addAIMsg already does it)
+      if (reply) addAIMsg('ai', reply);
+      else addAIMsg('ai', `Olá! Modelo **${shortModel}** via OpenRouter.\n🔍 Analiso erros\n⚡ Auto-cancel reward < 0.50\n💬 Chat disponível`);
+    });
+  }
+}
+
+function disconnectAI() {
+  AI.connected = false;
+  AI.key = '';
+  localStorage.removeItem('ai_key');
+  localStorage.removeItem('ai_model');
+  localStorage.removeItem('ai_provider');
+  document.getElementById('ai-setup').style.display = 'block';
+  document.getElementById('ai-chat').style.display = 'none';
+  document.getElementById('ai-key-input').value = '';
+  document.getElementById('nd-ai').classList.remove('on');
+  document.getElementById('ai-detected-badge').style.display = 'none';
+  setAIKeyStatus('', 'td');
+}
+
+function clearChat() {
+  AI.history = [];
+  document.getElementById('ai-messages').innerHTML = '';
+}
+
+function addAIMsg(role, text) {
+  const msgs = document.getElementById('ai-messages');
+  const isUser = role === 'user';
+  const isSystem = role === 'system';
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+
+  if (isSystem) {
+    div.innerHTML = `<div class="ai-bubble" style="width:100%">${esc(text)}</div>`;
+  } else {
+    const avatar = isUser
+      ? `<div class="ai-avatar user-av">👤</div>`
+      : `<div class="ai-avatar ai-av">✦</div>`;
+    const html = esc(text)
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(0,240,255,.1);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:10px">$1</code>')
+      .replace(/\n/g, '<br>');
+    div.innerHTML = `${avatar}<div class="ai-bubble">${html}</div>`;
+  }
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  if (!isSystem) AI.history.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
+  return div;
+}
+
+function addAITyping() {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ai';
+  div.id = 'ai-typing-bubble';
+  div.innerHTML = `<div class="ai-avatar ai-av">✦</div><div class="ai-bubble"><div class="ai-typing"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+// ── Core API call — OpenRouter (OpenAI-compatible) ──
+async function callAI(userMsg, opts = {}) {
+  if (!AI.connected || !AI.key) return null;
+
+  const messages = [
+    { role: 'system', content: AI_SYSTEM },
+    ...(opts.fresh ? [] : AI.history),
+    { role: 'user', content: userMsg }
+  ];
+
+  try {
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AI.key}`,
+        'HTTP-Referer': 'https://qwen-trainer.app',
+        'X-Title': 'Qwen Trainer'
+      },
+      body: JSON.stringify({
+        model: AI.model,
+        max_tokens: opts.maxTokens || 1000,
+        messages
+      }),
+      signal: AbortSignal.timeout(35000)
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+    return d.choices?.[0]?.message?.content || '';
+  } catch(e) {
+    return `❌ Erro: ${e.message}`;
+  }
+}
+
+async function sendAIMsg() {
+  const inp = document.getElementById('ai-msg-input');
+  const text = inp.value.trim();
+  if (!text || !AI.connected) return;
+  inp.value = '';
+  const btn = document.getElementById('ai-send-btn');
+  btn.disabled = true;
+  addAIMsg('user', text);
+  const typing = addAITyping();
+  const reply = await callAI(text);
+  typing.remove();
+  btn.disabled = false;
+  if (reply) addAIMsg('ai', reply);
+}
+
+
+// ── Auto-analyze errors ──
+async function analyzeError(cellTitle, errorText) {
+  if (!AI.connected) return;
+  const prompt = `Célula: "${cellTitle}"\n\nErro:\n${errorText.slice(0, 1500)}\n\nAnalise o erro e sugira 2-3 correções concretas.`;
+  showAIAlertLoading('🔍 Analisando erro…');
+  const reply = await callAI(prompt, { fresh: true, maxTokens: 600 });
+  showAIAlertResult('🔍 ANÁLISE DO ERRO', reply || 'Sem resposta', [
+    { label: 'Ver no chat', action: () => { goto('ai'); addAIMsg('ai', reply); closeAIAlert(); } },
+    { label: 'Fechar', action: closeAIAlert }
+  ]);
+  // also push to chat history
+  if (reply) {
+    AI.history.push({ role: 'user', content: prompt });
+    AI.history.push({ role: 'assistant', content: reply });
+  }
+}
+
+// ── Auto-cancel low reward ──
+let _lowRewardTimer;
+function checkLowReward(rewardVal) {
+  if (!AI.connected || !AI.autoCancel) return;
+  if (rewardVal < AI.LOW_REWARD_THRESHOLD) {
+    AI.lowRewardCount++;
+    const bar = document.getElementById('ai-autocancel-bar');
+    if (bar) { bar.style.display = ''; document.getElementById('ai-low-count').textContent = AI.lowRewardCount; }
+    if (AI.lowRewardCount >= AI.LOW_REWARD_STEPS && S.currentCid) {
+      AI.lowRewardCount = 0;
+      if (bar) bar.style.display = 'none';
+      toast('⚡ IA: reward baixo — cancelando…');
+      cancelCurrentCell();
+      setTimeout(() => analyzeAutoCancel(rewardVal), 1000);
+    }
+  } else {
+    AI.lowRewardCount = 0;
+    const bar = document.getElementById('ai-autocancel-bar');
+    if (bar) bar.style.display = 'none';
+  }
+}
+
+async function analyzeAutoCancel(lastReward) {
+  if (!AI.connected) return;
+  const ctx = `Reward combinado atual: ${lastReward.toFixed(4)}\nStep: ${S.grpoStep}\nBreakdown: ${JSON.stringify(S.reward, null, 2).slice(0, 400)}`;
+  const prompt = `O treinamento foi cancelado automaticamente pois o reward combinado ficou abaixo de 0.50 por ${AI.LOW_REWARD_STEPS} steps consecutivos.\n\n${ctx}\n\nAnalise quais reward functions estão com problemas e sugira ajustes de hiperparâmetros ou correções.`;
+  showAIAlertLoading('⚡ Analisando reward baixo…');
+  const reply = await callAI(prompt, { fresh: true, maxTokens: 700 });
+  showAIAlertResult('⚡ REWARD BAIXO — ANÁLISE', reply || 'Sem resposta', [
+    { label: 'Chat', action: () => { goto('ai'); addAIMsg('ai', reply); closeAIAlert(); } },
+    { label: 'Fechar', action: closeAIAlert }
+  ]);
+  document.getElementById('nd-ai').classList.add('on');
+}
+
+function toggleAutoCancel() {
+  AI.autoCancel = !AI.autoCancel;
+  const btn = document.getElementById('autocancel-toggle-btn');
+  if (btn) btn.textContent = AI.autoCancel ? 'ON' : 'OFF';
+  toast(`⚡ Auto-cancel: ${AI.autoCancel ? 'ativado' : 'desativado'}`);
+}
+
+// ── Alert UI ──
+function showAIAlertLoading(title) {
+  document.getElementById('ai-alert-icon').textContent = '⏳';
+  document.getElementById('ai-alert-title').textContent = title;
+  document.getElementById('ai-alert-body').textContent = 'Consultando IA…';
+  document.getElementById('ai-alert-acts').innerHTML = '';
+  document.getElementById('ai-alert').classList.add('show');
+}
+
+function showAIAlertResult(title, body, actions) {
+  document.getElementById('ai-alert-icon').textContent = '🤖';
+  document.getElementById('ai-alert-title').textContent = title;
+  document.getElementById('ai-alert-body').innerHTML = esc(body)
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/`([^`]+)`/g, '<code style="background:rgba(0,240,255,.08);padding:1px 4px;border-radius:3px;font-family:var(--mono);font-size:10px">$1</code>')
+    .replace(/\n/g, '<br>');
+  const acts = document.getElementById('ai-alert-acts');
+  acts.innerHTML = '';
+  actions.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'btn btn-ghost btn-xs';
+    b.textContent = a.label;
+    b.onclick = a.action;
+    acts.appendChild(b);
+  });
+}
+
+function closeAIAlert() {
+  document.getElementById('ai-alert').classList.remove('show');
+}
+
+// Hook into cell error detection
+const _origFinishDrawer = finishDrawer;
+finishDrawer = function(status) {
+  _origFinishDrawer(status);
+  if (status === 'err' && AI.connected && S.currentCid) {
+    const c = S.cells.find(x => x.id === S.currentCid);
+    if (c && c.output) {
+      const errLines = c.output.split('\n').filter(l => /error|traceback|exception/i.test(l)).slice(0, 20).join('\n');
+      if (errLines) setTimeout(() => analyzeError(c.title, c.output.slice(-1200)), 800);
+    }
+  }
+};
+
+// Hook reward check into parseLine
+const _origParseLine = parseLine;
+parseLine = function(text) {
+  _origParseLine(text);
+  if (AI.connected && S.combinedReward !== null && S.grpoStep > 0) {
+    checkLowReward(S.combinedReward);
+  }
+};
+
+renderCells();
+goto('connect');
+
+function fixNavHeight() {
+  const nav = document.querySelector('nav');
+  if (!nav) return;
+  const winH = window.innerHeight;
+  const vvH = window.visualViewport ? window.visualViewport.height : winH;
+  const sysBar = Math.round(winH - vvH - (window.visualViewport ? window.visualViewport.offsetTop : 0));
+  const extra = Math.max(0, sysBar);
+  nav.style.paddingBottom = (8 + extra) + 'px';
+  const navH = nav.offsetHeight;
+  // only set paddingBottom on scroll screens — NOT on #scr-ai (flex layout, would bury textarea)
+  document.querySelectorAll('.scr:not(#scr-ai)').forEach(s => s.style.paddingBottom = (navH + 8) + 'px');
+  // for AI screen: pad only the input row
+  const aiInput = document.querySelector('.ai-input-row');
+  if (aiInput) aiInput.style.paddingBottom = (extra + 12) + 'px';
+  // Update drawers
+  ['live-drawer','stage-drawer','modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.bottom = navH + 'px';
+  });
+}
+fixNavHeight();
+window.addEventListener('resize', fixNavHeight);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fixNavHeight);
+
+setInterval(async()=>{
+  if(!S.connected)return;
+  try{const r=await fetch(`${S.url}/ping`,{signal:AbortSignal.timeout(5000)});const d=await r.json();if(d.vram)updateVram(d.vram);}catch{}
+},30000);
+</script>
+</body>
+</html>
