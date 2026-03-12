@@ -1,244 +1,108 @@
-# ══════════════════════════════════════════════════════════════
-# .coderabbit.yaml — Qwen Mission Control Dashboard
+# =============================================================================
+# .coderabbit.yaml — QWEN Mission Control
 # CodeRabbit AI Review Configuration
-# ══════════════════════════════════════════════════════════════
+# =============================================================================
 
 language: "pt-BR"
 
 reviews:
-  # ── Review principal ──
+  # ── Revisão geral ──────────────────────────────────────────────────────────
   request_changes_workflow: true
   high_level_summary: true
-  high_level_summary_placeholder: "@coderabbitai resumo"
-  auto_title_placeholder: "[CR]"
-  poem: false
+  high_level_summary_placeholder: "@coderabbitai summary"
+  auto_title_placeholder: "@coderabbitai"
   review_status: true
   collapse_walkthrough: false
   sequence_diagrams: true
-  changed_files_summary: true
-  abort_on_close: true
-  
-  # ── Perfil de review ──
-  profile: "assertive"
-  
-  # ── Path filters (incluir tudo relevante) ──
-  path_filters:
-    - "**/*.html"
-    - "**/*.js"
-    - "**/*.css"
-    - "**/*.py"
-    - "**/*.yaml"
-    - "**/*.yml"
-    - "**/*.json"
-    - "!node_modules/**"
-    - "!.git/**"
-    - "!dist/**"
-    - "!build/**"
+  poem: false
 
-  # ── Tools de análise estática ──
+  # ── Perfil de revisão ─────────────────────────────────────────────────────
+  profile: "assertive"
+  path_instructions:
+    - path: "**/*.html"
+      instructions: |
+        Este arquivo é um **single-file HTML app** (QWEN Mission Control) que contém
+        HTML + CSS + JavaScript inline. Trate TUDO dentro de <script> como código
+        JavaScript de produção. Revise com o mesmo rigor de um .js separado.
+
+        ## Contexto do projeto
+        - Painel mobile para monitorar treinamento de LLM (Qwen2.5-Coder-7B) no Google Colab
+        - Conecta via Cloudflare Tunnel bridge
+        - Usa Groq API (groq.com) para inferência de IA — NÃO é Grok (xAI)
+        - Integra Tavily (busca semântica) e Wikipedia API como fallback
+        - Modos de IA: Deep Think (3 passes), Deep Research (sub-queries), Agent ReAct (loop)
+        - Roteamento inteligente de modelos Groq (QwQ-32B, DeepSeek-R1, Llama-3.3-70B, etc.)
+
+        ## Problemas conhecidos — PRIORIZE revisar e sugerir correções para:
+
+        ### 🔴 P1 — Scan de modelos travado/lento
+        - O scan usa /models da Groq mas às vezes cai em fallback de pings paralelos
+        - Verificar: timeout handling, race conditions, Promise.allSettled vs Promise.all
+        - Sugerir: abort controller, cache de resultados, debounce na reconexão
+
+        ### 🔴 P2 — Feedback visual insuficiente durante scan
+        - O header muda label mas não mostra progresso granular
+        - Verificar: se existe UI de progresso (X de Y modelos, qual encontrado)
+        - Sugerir: barra de progresso ou lista ao vivo com status por modelo
+
+        ### 🟡 P3 — Chave API não persiste ao trocar arquivo
+        - localStorage pode falhar quando o path/nome do arquivo muda (origem diferente)
+        - Verificar: lógica de leitura do localStorage no init, fallback para sessionStorage
+        - Sugerir: ler de ambos (localStorage → sessionStorage → prompt), normalizar a chave de storage
+
+        ### 🟡 P4 — Roteamento de modelo inconsistente
+        - Às vezes seleciona modelo fraco (8B) quando há modelo forte disponível (70B, QwQ)
+        - Verificar: lógica de seleção/ranking de modelos, se a lista de disponíveis está atualizada
+        - Sugerir: ranking explícito por capability tier, validação antes da primeira mensagem
+
+        ## Regras de revisão específicas
+        - **Segurança**: chaves de API NUNCA devem aparecer hardcoded ou em logs do console
+        - **Performance mobile**: verificar listeners sem cleanup, memory leaks em intervals/timeouts
+        - **Error handling**: todo fetch/await deve ter try-catch com fallback gracioso
+        - **UX**: estados de loading, empty states e erros devem ser visíveis ao usuário
+        - **Acessibilidade**: verificar contraste, touch targets mínimos de 44px, labels em inputs
+
+    - path: "**/*.py"
+      instructions: |
+        Código Python do lado do Colab (bridge/pipeline). Verificar:
+        - Segurança do tunnel (autenticação, sanitização de input)
+        - Gerenciamento de VRAM (torch.cuda.empty_cache, gradient checkpointing)
+        - Logging estruturado para as métricas que o painel consome
+
+    - path: "**/*.{json,yaml,yml}"
+      instructions: |
+        Arquivos de configuração. Verificar:
+        - Não conter chaves/tokens hardcoded
+        - Schemas válidos
+        - Valores de timeout e retry razoáveis
+
+  # ── Ferramentas de análise ─────────────────────────────────────────────────
   tools:
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    languagetool:
+      enabled: true
+      enabled_rules:
+        - "PT_BR"
+    biome:
+      enabled: true
     htmlhint:
       enabled: true
     eslint:
       enabled: true
-    stylelint:
-      enabled: true
-    biome:
-      enabled: true
-    markdownlint:
-      enabled: true
-
-  # ══════════════════════════════════════════════════════════
-  # SYSTEM PROMPT — INSTRUÇÕES DETALHADAS PARA O REVIEWER
-  # ══════════════════════════════════════════════════════════
-  system_prompt: |
-    Você é um senior full-stack engineer e security auditor especializado em:
-    - Aplicações web single-page (HTML/CSS/JS vanilla)
-    - Integração com APIs externas (OpenRouter, Google Colab)
-    - Aplicações de ML/AI training dashboards
-    - Mobile-first PWA design
-    - Segurança de aplicações client-side
-    
-    ## CONTEXTO DO PROJETO
-    
-    Este é o **Qwen Mission Control** — um dashboard mobile-first que:
-    1. Conecta ao Google Colab via **Cloudflare Tunnel** (Flask backend)
-    2. Gerencia **células de código** (estilo Jupyter notebook remoto)
-    3. Monitora pipeline de treinamento **Qwen2.5-Coder-7B** (SFT + MO-GRPO)
-    4. Mostra métricas em tempo real: steps, reward, loss, VRAM
-    5. Integra **assistente IA via OpenRouter** (Claude, GPT-4o, Gemini, etc.)
-    6. Faz streaming de output via **Server-Sent Events (SSE)**
-    7. Tem sistema de **auto-cancel** quando reward < 0.50 por N steps
-    8. Suporta **cancel de células** via PyThreadState_SetAsyncExc
-    
-    ## STACK TÉCNICA
-    - **Frontend**: HTML5 + CSS3 + Vanilla JS (single file, ~2500 linhas)
-    - **Backend** (Colab): Flask + flask-cors + cloudflared tunnel
-    - **AI**: OpenRouter API (OpenAI-compatible format)
-    - **Charts**: Chart.js 4.x
-    - **Fonts**: Orbitron + JetBrains Mono (Google Fonts)
-    - **Design**: Dark theme espacial, glassmorphism, CSS custom properties
-    - **Mobile**: viewport-fit=cover, safe-area-inset, touch-optimized
-    
-    ## REGRAS DE REVIEW — SIGA TODAS
-    
-    ### 🔒 SEGURANÇA (PRIORIDADE MÁXIMA)
-    1. **XSS**: Verifique se TODA input do usuário passa pela função `esc()` antes de innerHTML
-    2. **API Keys**: A chave OpenRouter é salva em localStorage — flagge como risco
-    3. **exec() no backend**: O Flask roda `exec()` de código arbitrário — isso é BY DESIGN no Colab, mas documente o risco
-    4. **CORS wildcard**: O backend usa `origins: "*"` — verifique se é aceitável
-    5. **eval/innerHTML**: Procure por injeção de código em `fmtOut()`, `addAIMsg()`, etc.
-    6. **localStorage**: Verifique o que é persistido e se há dados sensíveis
-    7. **fetch sem validação**: Verifique se responses são validadas antes de uso
-    8. **Cloudflare Tunnel**: URL pública sem auth — flagge o risco
-    
-    ### 🐛 BUGS E ROBUSTEZ
-    1. **Race conditions**: Múltiplas células rodando simultâneamente — verifique state management
-    2. **Memory leaks**: Verifique se readers/timers são limpos corretamente
-    3. **Error handling**: Todo `fetch()` deve ter catch adequado
-    4. **Stream handling**: Verifique se `ReadableStream` é properly closed em todos os cenários
-    5. **Reconnection**: Verifique se a lógica de reconexão após restart funciona
-    6. **State sync**: `S.cells` é modificado e persistido — verifique consistência
-    7. **Chart.js**: Verifique se o chart é destruído antes de recriar (memory leak)
-    8. **Regex parsing**: Os regex de `parseLine()` são frágeis — sugira melhorias
-    
-    ### 🏗️ ARQUITETURA E CÓDIGO
-    1. **Single-file monolith**: ~2500 linhas em um arquivo — sugira modularização
-    2. **Global state**: Objeto `S` e `AI` como state global — sugira patterns melhores
-    3. **Function monkey-patching**: `finishDrawer` e `parseLine` são overridden — é frágil
-    4. **CSS variables**: Verifique consistência no uso de custom properties
-    5. **Event listeners**: Verifique se há listeners duplicados
-    6. **DOM queries repetidas**: `document.getElementById()` chamado repetidamente — cache
-    7. **Magic numbers/strings**: Regex patterns, thresholds hardcoded
-    8. **Separation of concerns**: Lógica misturada entre UI, parsing, networking
-    
-    ### 📱 MOBILE E UX
-    1. **Touch targets**: Botões devem ter min 44x44px para mobile
-    2. **Safe areas**: Verifique uso correto de `env(safe-area-inset-*)`
-    3. **Keyboard handling**: Textarea no chat AI — verifique se não é coberta pelo keyboard
-    4. **Scroll performance**: `-webkit-overflow-scrolling: touch` está presente?
-    5. **Viewport**: `maximum-scale=1,user-scalable=no` bloqueia zoom — acessibilidade
-    6. **Font loading**: Verifique se fonts não bloqueiam render (preload está ok?)
-    7. **Drawer gestures**: Drawers não têm swipe-to-dismiss — sugira
-    8. **Offline**: Sem service worker — funciona offline? Deve?
-    
-    ### ⚡ PERFORMANCE
-    1. **DOM manipulation**: `renderCells()` recria todo o DOM — ineficiente para muitas células
-    2. **Chart updates**: `update('none')` é correto para skip animation
-    3. **setInterval polling**: 30s ping interval — verifique se é limpo
-    4. **String concatenation**: Output acumulado em string (`c.output += msg.v`) — pode crescer muito
-    5. **Regex em loop**: `parseLine()` roda múltiplos regex por linha — optimize
-    6. **CSS animations**: Verifique se animations com `box-shadow` causam repaint excessivo
-    7. **Font preloading**: Usar `<link rel="preload">` com onload é correto?
-    8. **Script defer**: Chart.js é carregado com defer — verifique timing
-    
-    ### 🎨 CSS E DESIGN
-    1. **CSS custom properties**: ~40 variáveis em :root — organização está boa?
-    2. **Specificity wars**: Verifique se há conflitos de especificidade
-    3. **Responsive**: Não há media queries explícitas — tudo é fluid?
-    4. **Color contrast**: Texto `var(--tdd)` (#2a2a5a) sobre `var(--bg)` (#00000c) — WCAG?
-    5. **Overflow handling**: `word-break: break-all` pode quebrar palavras incorretamente
-    6. **z-index stacking**: nav=9999, drawers=150, alerts=220, toast=300 — documentar
-    7. **Transitions**: Verifique se todas as transitions são suaves e não causam jank
-    8. **Print styles**: Nenhum — relevante?
-    
-    ### 🔌 INTEGRAÇÃO COLAB
-    1. **Bridge Python**: Verifique se o snippet Flask é seguro e robusto
-    2. **Thread safety**: `_globals` dict compartilhado entre threads sem lock
-    3. **Cloudflared**: Download direto do GitHub — verifique se é a versão correta
-    4. **SSE format**: Verifique se o formato `data:...\n\n` está correto
-    5. **Cancel mechanism**: `PyThreadState_SetAsyncExc` não cancela IO bloqueante
-    6. **Namespace pollution**: `exec()` com `_globals` compartilhado entre células
-    7. **Memory cleanup**: Não há garbage collection explícito após célula terminar
-    8. **Timeout handling**: `AbortSignal.timeout()` — browser support?
-    
-    ### 🤖 INTEGRAÇÃO AI (OpenRouter)
-    1. **API format**: Verifique se o payload está correto para OpenRouter
-    2. **Error handling**: Verifique se erros da API são tratados adequadamente
-    3. **Token limit**: `max_tokens` hardcoded — deveria ser configurável?
-    4. **Rate limiting**: Não há throttling de requests à API
-    5. **History management**: `AI.history` cresce sem limite — cap it
-    6. **System prompt**: Verifique se é adequado e não vaza informação sensível
-    7. **Model fallback**: Se modelo escolhido falhar, tenta outro?
-    8. **Cost awareness**: Sem estimativa de custo por request
-    
-    ## FORMATO DE REVIEW
-    
-    Para cada issue encontrado, use este formato:
-    
-    **Severidade**: 🔴 Crítico | 🟠 Alto | 🟡 Médio | 🟢 Baixo | 💡 Sugestão
-    **Categoria**: Segurança | Bug | Performance | UX | Arquitetura | Estilo
-    **Localização**: Linha ou função específica
-    **Problema**: Descrição clara
-    **Solução**: Código corrigido ou sugestão concreta
-    
-    ## PRIORIDADES DE REVIEW
-    
-    1. 🔴 Vulnerabilidades de segurança (XSS, key exposure, exec)
-    2. 🔴 Bugs que causam crash ou perda de dados
-    3. 🟠 Memory leaks e race conditions
-    4. 🟠 Error handling inadequado
-    5. 🟡 Performance problems
-    6. 🟡 Mobile UX issues
-    7. 🟢 Code quality e maintainability
-    8. 💡 Sugestões de melhoria e modernização
-    
-    Seja DETALHADO. Dê exemplos de código corrigido. Use português BR.
-    Quando sugerir mudanças, mostre o diff exato.
-
-  # ══════════════════════════════════════════════════════════
-  # PATH-SPECIFIC INSTRUCTIONS
-  # ══════════════════════════════════════════════════════════
-  path_instructions:
-    - path: "**/*.html"
-      instructions: |
-        Este é um SPA monolítico. Foque em:
-        - Separação HTML/CSS/JS inline vs external
-        - Acessibilidade (ARIA labels, semantic HTML)
-        - Meta tags para PWA/mobile
-        - Script loading order e defer/async
-        - innerHTML vs textContent (XSS vectors)
-        - IDs duplicados ou missing
-        - Forms sem labels
-        - Links sem href adequado
-        
-    - path: "**/*.py"
-      instructions: |
-        Código Python roda dentro do Google Colab. Foque em:
-        - Thread safety (shared mutable state)
-        - exec() security implications
-        - Flask route security
-        - SSE streaming correctness
-        - Exception handling completeness
-        - Resource cleanup (threads, processes)
-        - Python 3.10+ compatibility
-        - pip install security (pinned versions?)
-        
-    - path: "**/*.css"
-      instructions: |
-        CSS usa custom properties extensivamente. Foque em:
-        - Variáveis não utilizadas
-        - Fallback values para custom properties
-        - Browser compatibility (webkit prefixes)
-        - Mobile-specific issues
-        - Animation performance (transform vs layout properties)
-        - Dark mode contrast ratios
-
-    - path: "**/*.js"
-      instructions: |
-        JavaScript vanilla sem framework. Foque em:
-        - Global scope pollution
-        - Event listener cleanup
-        - Async/await error handling
-        - DOM manipulation efficiency
-        - State management patterns
-        - Browser API compatibility
-        - Memory management
 
 chat:
   auto_reply: true
 
-knowledge_base:
-  opt_out: false
-  learnings:
-    scope: "auto"
+# ── Filtros de arquivo ───────────────────────────────────────────────────────
+path_filters:
+  - "!**/*.min.js"
+  - "!**/*.min.css"
+  - "!**/node_modules/**"
+  - "!**/.git/**"
+  - "!**/dist/**"
+
+# ── Configuração de early access ─────────────────────────────────────────────
+early_access: true
